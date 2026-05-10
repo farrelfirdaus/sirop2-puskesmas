@@ -2,42 +2,49 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use App\Models\Pendaftaran;
+use App\Models\User;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $totalPasien = DB::table('pasien')->count();
-        
-        $kunjunganHariIni = DB::table('kunjungan')
-            ->whereDate('created_at', Carbon::today())
-            ->count();
-            
-        $kunjunganBulanIni = DB::table('kunjungan')
-            ->whereMonth('created_at', Carbon::now()->month)
-            ->whereYear('created_at', Carbon::now()->year)
-            ->count();
-            
-        $totalKunjungan = DB::table('kunjungan')->count();
+        $today = now()->toDateString();
 
-        $pasienBaru = DB::table('pasien')
-            ->whereDate('created_at', Carbon::today())
-            ->count();
+        $kunjunganHariIni   = Pendaftaran::whereDate('tanggal_kunjungan', $today)->count();
+        $totalPasien        = User::where('role', 'pasien')->count();
+        $totalKunjungan     = User::where('role', 'pasien')->whereDate('created_at', $today)->count();
+        $kunjunganBulanIni  = Pendaftaran::where('status', 'menunggu')->count();
 
-        $antrianAktif = DB::table('kunjungan')
-            ->whereDate('created_at', Carbon::today())
-            ->count();
+        // Grafik 7 hari terakhir
+        $grafik = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $tanggal  = now()->subDays($i)->toDateString();
+            $hari     = now()->subDays($i)->locale('id')->isoFormat('ddd');
+            $grafik[] = [
+                'hari'   => $hari,
+                'jumlah' => Pendaftaran::whereDate('tanggal_kunjungan', $tanggal)->count(),
+            ];
+        }
+
+        // Antrian saat ini
+        $nomorAntrian  = Pendaftaran::where('status', 'menunggu')
+                            ->whereDate('tanggal_kunjungan', $today)
+                            ->max('nomor_antrian') ?? 0;
+        $sudahDilayani = Pendaftaran::where('status', 'selesai')
+                            ->whereDate('tanggal_kunjungan', $today)->count();
+        $menunggu      = Pendaftaran::where('status', 'menunggu')
+                            ->whereDate('tanggal_kunjungan', $today)->count();
 
         return view('dashboard', compact(
+            'kunjunganHariIni',
             'totalPasien',
-            'kunjunganHariIni', 
-            'kunjunganBulanIni',
             'totalKunjungan',
-            'pasienBaru',
-            'antrianAktif'
+            'kunjunganBulanIni',
+            'grafik',
+            'nomorAntrian',
+            'sudahDilayani',
+            'menunggu'
         ));
     }
 }

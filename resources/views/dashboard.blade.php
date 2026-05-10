@@ -102,24 +102,50 @@
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Antrian Saat Ini</h6>
             </div>
-            <div class="card-body text-center">
-                <h1 class="display-4 font-weight-bold text-primary">A-013</h1>
-                <p class="mb-2">Nomor Antrian Saat Ini</p>
-                <hr>
-                <div class="d-flex justify-content-between px-4">
-                    <div>
-                        <h5 class="text-success">10</h5>
-                        <small>Sudah Dilayani</small>
-                    </div>
-                    <div>
-                        <h5 class="text-danger">5</h5>
-                        <small>Menunggu</small>
-                    </div>
-                </div>
-            </div>
+           <div class="card-body text-center">
+    <h1 class="display-4 font-weight-bold text-primary">
+        A-0{{ str_pad($nomorAntrian, 2, '0', STR_PAD_LEFT) }}
+    </h1>
+    <p class="mb-2">Nomor Antrian Saat Ini</p>
+    <hr>
+    <div class="d-flex justify-content-between px-4">
+        <div>
+            <h5 class="text-success">{{ $sudahDilayani }}</h5>
+            <small>Sudah Dilayani</small>
+        </div>
+        <div>
+            <h5 class="text-danger">{{ $menunggu }}</h5>
+            <small>Menunggu</small>
         </div>
     </div>
 </div>
+        </div>
+    </div>
+</div>
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('myAreaChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode(array_column($grafik, 'hari')) !!},
+            datasets: [{
+                label: 'Kunjungan',
+                data: {!! json_encode(array_column($grafik, 'jumlah')) !!},
+                backgroundColor: 'rgba(78, 115, 223, 0.7)',
+                borderColor: 'rgba(78, 115, 223, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        }
+    });
+</script>
+@endpush
 
 @endsection
 

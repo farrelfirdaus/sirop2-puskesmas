@@ -30,6 +30,21 @@
             <span>Data Pasien</span>
         </a>
     </li>
+    {{-- Kelola Dokter --}}
+<li class="nav-item {{ request()->routeIs('dokter.*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('dokter.index') }}">
+        <i class="fas fa-fw fa-user-md"></i>
+        <span>Kelola Dokter</span>
+    </a>
+</li>
+
+{{-- Data Pendaftaran --}}
+<li class="nav-item {{ request()->routeIs('pendaftaran.admin') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('pendaftaran.admin') }}">
+        <i class="fas fa-fw fa-clipboard-list"></i>
+        <span>Data Pendaftaran</span>
+    </a>
+</li>
 <!-- Nav Item - Laporan -->
 <li class="nav-item">
     <a class="nav-link" href="#">

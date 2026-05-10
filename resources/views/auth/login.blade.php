@@ -32,7 +32,7 @@
             @endif
 
             <div class="input-box">
-                <input type="text" name="name" placeholder="Nama"
+                <input type="email" name="email" placeholder="Email"
                     value="{{ old('name') }}" required />
                 <i class="fa-solid fa-user"></i>
             </div>
@@ -70,6 +70,10 @@
             </div>
             <div class="input-box">
                 <input type="password" name="password" placeholder="Password" required />
+                <div class="input-box">
+    <input type="password" name="password_confirmation" placeholder="Konfirmasi Password" required />
+    <i class="fa-solid fa-lock"></i>
+</div>
                 <i class="fa-solid fa-lock"></i>
             </div>
             <button type="submit" class="btn">Register</button>
