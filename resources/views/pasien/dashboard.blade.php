@@ -7,6 +7,57 @@
     <link rel="stylesheet" href="{{ asset('css/sb-admin-2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+    /* Full screen wrapper */
+    html, body, #wrapper {
+        height: 100%;
+        width: 100%;
+    }
+
+    #wrapper {
+        display: flex !important;
+        overflow: hidden;
+    }
+
+    /* Sidebar fixed height */
+    .sidebar {
+        min-height: 100vh;
+        height: 100%;
+    }
+
+    /* Content wrapper fill sisa layar */
+    #content-wrapper {
+        flex: 1 !important;
+        min-width: 0;
+        overflow-y: auto;
+        height: 100vh;
+    }
+
+    /* Responsive mobile */
+    @media (max-width: 768px) {
+        #wrapper {
+            flex-direction: column !important;
+        }
+
+        .sidebar {
+            width: 100% !important;
+            min-height: auto !important;
+            height: auto !important;
+        }
+
+        #content-wrapper {
+            height: auto !important;
+        }
+
+        .container-fluid {
+            padding: 12px !important;
+        }
+
+        .col-xl-4 {
+            margin-bottom: 12px;
+        }
+    }
+</style>
 </head>
 <body id="page-top">
 <div id="wrapper">
@@ -149,51 +200,88 @@
                     </div>
                 </div>
 
-                {{-- Riwayat Terakhir --}}
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Riwayat Kunjungan Terakhir</h6>
-                    </div>
-                    <div class="card-body">
-                        @if($riwayat->isEmpty())
-                            <p class="text-center text-muted">Belum ada riwayat kunjungan.</p>
-                        @else
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Tanggal</th>
-                                            <th>Dokter</th>
-                                            <th>No. Antrian</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($riwayat as $r)
-                                        <tr>
-                                            <td>{{ \Carbon\Carbon::parse($r->tanggal_kunjungan)->format('d M Y') }}</td>
-                                            <td>{{ $r->dokter->nama }}</td>
-                                            <td>{{ $r->nomor_antrian }}</td>
-                                            <td>
-                                                @if($r->status == 'menunggu')
-                                                    <span class="badge badge-warning">Menunggu</span>
-                                                @elseif($r->status == 'selesai')
-                                                    <span class="badge badge-success">Selesai</span>
-                                                @else
-                                                    <span class="badge badge-danger">Batal</span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @endif
-                        <a href="{{ route('pendaftaran.riwayat') }}" class="btn btn-primary btn-sm">
-                            Lihat Semua Riwayat
-                        </a>
-                    </div>
+                <div class="row">
+    {{-- Antrian Aktif --}}
+<div class="col-xl-4 col-lg-5 mb-4">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Antrian Saat Ini</h6>
+        </div>
+        <div class="card-body text-center">
+            @if($antrianAktif)
+                <h1 class="display-4 font-weight-bold text-primary">
+                    No. {{ $antrianAktif->nomor_antrian }}
+                </h1>
+                <p class="mb-1">Nomor Antrian Kamu</p>
+                <p class="text-muted small">{{ $antrianAktif->poli }} — {{ \Carbon\Carbon::parse($antrianAktif->tanggal_kunjungan)->format('d M Y') }}</p>
+            @else
+                <h1 class="display-4 font-weight-bold text-muted">—</h1>
+                <p class="text-muted">Tidak ada antrian aktif hari ini</p>
+                
+            @endif
+            <hr>
+            <div class="d-flex justify-content-between px-4">
+                <div>
+                    <h5 class="text-success">{{ $sudahDilayani }}</h5>
+                    <small>Sudah Dilayani</small>
                 </div>
+                <div>
+                    <h5 class="text-danger">{{ $menunggu }}</h5>
+                    <small>Menunggu</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    {{-- Riwayat Terakhir --}}
+    <div class="col-xl-8 col-lg-7 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Riwayat Kunjungan Terakhir</h6>
+            </div>
+            <div class="card-body">
+                @if($riwayat->isEmpty())
+                    <p class="text-center text-muted">Belum ada riwayat kunjungan.</p>
+                @else
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Poli</th>
+                                    <th>No. Antrian</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($riwayat as $r)
+                                <tr>
+                                    <td>{{ \Carbon\Carbon::parse($r->tanggal_kunjungan)->format('d M Y') }}</td>
+                                    <td>{{ $r->poli }}</td>
+                                    <td>{{ $r->nomor_antrian }}</td>
+                                    <td>
+                                        @if($r->status == 'menunggu')
+                                            <span class="badge badge-warning">Menunggu</span>
+                                        @elseif($r->status == 'selesai')
+                                            <span class="badge badge-success">Selesai</span>
+                                        @else
+                                            <span class="badge badge-danger">Batal</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+                <a href="{{ route('pendaftaran.riwayat') }}" class="btn btn-primary btn-sm">
+                    Lihat Semua Riwayat
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
             </div>
         </div>

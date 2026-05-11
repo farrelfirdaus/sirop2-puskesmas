@@ -18,7 +18,6 @@ class PendaftaranController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'dokter_id'           => 'required|exists:dokter,id',
             'tanggal_kunjungan'   => 'required|date|after_or_equal:today',
             'keluhan'             => 'required|string',
             'untuk'               => 'required|in:diri_sendiri,orang_lain',
@@ -32,24 +31,25 @@ class PendaftaranController extends Controller
             'pendidikan_terakhir' => 'required|string',
             'pekerjaan'           => 'required|string',
             'golongan_darah'      => 'required|string',
+            'poli'                => 'required|string|in:Poli Umum,Poli Gigi,Poli KIA',
         ]);
 
         // Hitung nomor antrian
-        $jumlahAntrian = Pendaftaran::where('dokter_id', $request->dokter_id)
+        $jumlahAntrian = Pendaftaran::
+            where('poli', $request->poli)
             ->where('tanggal_kunjungan', $request->tanggal_kunjungan)
             ->count();
 
         // Cek kuota
-        $dokter = Dokter::find($request->dokter_id);
-        if ($jumlahAntrian >= $dokter->kuota_per_hari) {
-            return back()->with('error', 'Maaf, kuota dokter untuk tanggal ini sudah penuh!');
-        }
+        $kuotaPerHari = 20; // sesuaikan dengan kebutuhan
+if ($jumlahAntrian >= $kuotaPerHari) {
+    return back()->with('error', 'Maaf, kuota poli untuk tanggal ini sudah penuh!');
+}
 
         $nomorAntrian = $jumlahAntrian + 1;
 
         Pendaftaran::create([
             'user_id'             => Auth::id(),
-            'dokter_id'           => $request->dokter_id,
             'nama_pasien'         => $request->nama_pasien,
             'nik_pasien'          => $request->nik_pasien,
             'tempat_lahir'        => $request->tempat_lahir,
@@ -65,6 +65,7 @@ class PendaftaranController extends Controller
             'nomor_antrian'       => $nomorAntrian,
             'untuk'               => $request->untuk,
             'status'              => 'menunggu',
+            'poli'                => $request->poli,
         ]);
 
         return redirect()->route('pendaftaran.riwayat')
@@ -73,9 +74,9 @@ class PendaftaranController extends Controller
 
     public function riwayat()
     {
-        $riwayat = Pendaftaran::where('user_id', Auth::id())
-            ->with('dokter')
-            ->latest()
+
+$riwayat = Pendaftaran::where('user_id', Auth::id())
+    ->latest()
             ->get();
         return view('pasien.riwayat', compact('riwayat'));
     }

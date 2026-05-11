@@ -10,14 +10,30 @@ class PasienDashboardController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
-        $riwayat = Pendaftaran::where('user_id', $user->id)
+        $riwayat = Pendaftaran::where('user_id', Auth::id())
             ->latest()
             ->take(5)
             ->get();
+
+        $antrianAktif = Pendaftaran::where('user_id', Auth::id())
+            ->whereDate('tanggal_kunjungan', today())
+            ->where('status', 'menunggu')
+            ->latest()
+            ->first();
+
+        $sudahDilayani = Pendaftaran::whereDate('tanggal_kunjungan', today())
+            ->where('status', 'selesai')
+            ->count();
+
+        $menunggu = Pendaftaran::whereDate('tanggal_kunjungan', today())
+            ->where('status', 'menunggu')
+            ->count();
+
         $dokterAktif = Dokter::where('status', 'aktif')->count();
 
-        return view('pasien.dashboard', compact('user', 'riwayat', 'dokterAktif'));
+        return view('pasien.dashboard', compact(
+            'riwayat', 'antrianAktif', 'sudahDilayani', 'menunggu', 'dokterAktif'
+        ));
     }
 
     public function jadwal()

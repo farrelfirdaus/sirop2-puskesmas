@@ -10,7 +10,7 @@ class Pendaftaran extends Model
 
     protected $fillable = [
         'user_id',
-        'dokter_id',
+        'poli',  
         'nama_pasien',
         'nik_pasien',
         'tempat_lahir',

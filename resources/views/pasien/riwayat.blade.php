@@ -67,7 +67,7 @@
                                             <th>No</th>
                                             <th>Tanggal Kunjungan</th>
                                             <th>Nama Pasien</th>
-                                            <th>Dokter</th>
+                                         
                                             <th>Spesialisasi</th>
                                             <th>No. Antrian</th>
                                             <th>Keluhan</th>
@@ -81,8 +81,7 @@
                                             <td>{{ $i + 1 }}</td>
                                             <td>{{ \Carbon\Carbon::parse($r->tanggal_kunjungan)->format('d M Y') }}</td>
                                             <td>{{ $r->nama_pasien }}</td>
-                                            <td>{{ $r->dokter->nama }}</td>
-                                            <td>{{ $r->dokter->spesialisasi }}</td>
+                                            <td>{{ $r->poli }}</td>
                                             <td>
                                                 <span class="badge badge-primary" style="font-size:1em">
                                                     No. {{ $r->nomor_antrian }}

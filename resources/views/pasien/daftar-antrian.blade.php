@@ -182,28 +182,25 @@
                                 </div>
                             </div>
 
-                            {{-- Pilih Dokter & Jadwal --}}
-                            <div class="card mb-4">
-                                <div class="card-header bg-light">
-                                    <h6 class="m-0 font-weight-bold text-secondary">Pilih Dokter & Jadwal</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Pilih Dokter</label>
-                                                <select name="dokter_id" class="form-control" required>
-                                                    <option value="">-- Pilih Dokter --</option>
-                                                    @foreach($dokter as $d)
-                                                        <option value="{{ $d->id }}"
-                                                            {{ old('dokter_id', request('dokter_id')) == $d->id ? 'selected' : '' }}>
-                                                            {{ $d->nama }} — {{ $d->spesialisasi }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
+                            {{-- Pilih Poli & Jadwal --}}
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h6 class="m-0 font-weight-bold text-secondary">Pilih Poli & Jadwal</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Pilih Poli</label>
+                    <select name="poli" class="form-control" required>
+                        <option value="">-- Pilih Poli --</option>
+                        <option value="Poli Umum" {{ old('poli') == 'Poli Umum' ? 'selected' : '' }}>Poli Umum</option>
+                        <option value="Poli Gigi" {{ old('poli') == 'Poli Gigi' ? 'selected' : '' }}>Poli Gigi</option>
+                        <option value="Poli KIA" {{ old('poli') == 'Poli KIA' ? 'selected' : '' }}>Poli KIA</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Tanggal Kunjungan</label>
                                                 <input type="date" name="tanggal_kunjungan" class="form-control"
@@ -230,6 +227,8 @@
         </div>
     </div>
 </div>
+
+                            
 
 <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
 <script>
