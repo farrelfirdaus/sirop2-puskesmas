@@ -73,6 +73,7 @@
                                             <th>Keluhan</th>
                                             <th>Untuk</th>
                                             <th>Status</th>
+                                            <th>Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -104,6 +105,44 @@
                                                     <span class="badge badge-danger">Batal</span>
                                                 @endif
                                             </td>
+                                            <td>
+    @if($r->status == 'menunggu' && $r->tanggal_kunjungan > now()->toDateString())
+        <form action="{{ route('pendaftaran.batal', $r->id) }}" 
+            method="POST" class="d-inline"
+            onsubmit="return confirm('Yakin mau batalkan antrian ini?')">
+            @csrf
+            @method('PATCH')
+            <button type="submit" class="btn btn-danger btn-sm">
+                <i class="fas fa-times"></i> Batalkan
+            </button>
+        </form>
+    @elseif($r->status == 'menunggu' && $r->tanggal_kunjungan <= now()->toDateString())
+        <span class="text-muted small">Tidak bisa dibatalkan</span>
+    @else
+        <span class="text-muted small">-</span>
+    @endif
+
+    {{-- Tombol Google Calendar --}}
+    @if($r->status != 'batal')
+        @php
+            $tglMulai = \Carbon\Carbon::parse($r->tanggal_kunjungan)->format('Ymd');
+            $tglSelesai = \Carbon\Carbon::parse($r->tanggal_kunjungan)->addDay()->format('Ymd');
+            $judul = urlencode('Kunjungan ' . $r->poli . ' - SIROP Puskesmas');
+            $detail = urlencode('No. Antrian: ' . $r->nomor_antrian . '\nKeluhan: ' . $r->keluhan);
+            $gcalUrl = "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$judul}&dates={$tglMulai}/{$tglSelesai}&details={$detail}";
+        @endphp
+        <a href="{{ $gcalUrl }}" target="_blank" class="btn btn-success btn-sm mt-1">
+            <i class="fas fa-calendar-plus"></i> Google Calendar
+        </a>
+    @endif
+    {{-- Tombol Cetak PDF --}}
+@if($r->status != 'batal')
+    <a href="{{ route('pendaftaran.cetak', $r->id) }}" 
+        target="_blank" class="btn btn-primary btn-sm mt-1">
+        <i class="fas fa-print"></i> Cetak
+    </a>
+@endif
+</td>
                                         </tr>
                                         @endforeach
                                     </tbody>

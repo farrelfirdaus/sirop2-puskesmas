@@ -36,7 +36,7 @@
                         <td>{{ \Carbon\Carbon::parse($p->tanggal_kunjungan)->format('d M Y') }}</td>
                         <td>{{ $p->nama_pasien }}</td>
                         <td>{{ $p->nik_pasien }}</td>
-                        <td>{{ $p->dokter->nama }}</td>
+                        <td>{{ $p->poli }}</td>
                         <td>
                             <span class="badge badge-primary" style="font-size:1em">
                                 No. {{ $p->nomor_antrian }}
@@ -86,4 +86,22 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script>
+// Auto refresh halaman setiap 30 detik
+setInterval(function() {
+    fetch(window.location.href)
+        .then(r => r.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const tabelBaru = doc.querySelector('tbody');
+            const tabelLama = document.querySelector('tbody');
+            if (tabelBaru && tabelLama) {
+                tabelLama.innerHTML = tabelBaru.innerHTML;
+            }
+        });
+}, 10000); // setiap 10 detik
+</script>
+@endpush
 @endsection

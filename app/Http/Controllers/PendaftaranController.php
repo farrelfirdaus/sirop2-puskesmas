@@ -6,6 +6,8 @@ use App\Models\Dokter;
 use App\Models\Pendaftaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PendaftaranController extends Controller
 {
@@ -34,17 +36,18 @@ class PendaftaranController extends Controller
             'poli'                => 'required|string|in:Poli Umum,Poli Gigi,Poli KIA',
         ]);
 
-        // Hitung nomor antrian
-        $jumlahAntrian = Pendaftaran::
-            where('poli', $request->poli)
-            ->where('tanggal_kunjungan', $request->tanggal_kunjungan)
-            ->count();
+        // Hitung nomor antrian per poli
+$jumlahAntrian = Pendaftaran::where('poli', $request->poli)
+    ->where('tanggal_kunjungan', $request->tanggal_kunjungan)
+    ->count();
 
-        // Cek kuota
-        $kuotaPerHari = 20; // sesuaikan dengan kebutuhan
-if ($jumlahAntrian >= $kuotaPerHari) {
-    return back()->with('error', 'Maaf, kuota poli untuk tanggal ini sudah penuh!');
+// Cek kuota per poli (default 20)
+$kuotaPerPoli = 20;
+if ($jumlahAntrian >= $kuotaPerPoli) {
+    return back()->with('error', 'Maaf, kuota ' . $request->poli . ' untuk tanggal ini sudah penuh!');
 }
+
+$nomorAntrian = $jumlahAntrian + 1;
 
         $nomorAntrian = $jumlahAntrian + 1;
 
@@ -89,10 +92,79 @@ $riwayat = Pendaftaran::where('user_id', Auth::id())
         return view('admin.pendaftaran.index', compact('pendaftaran'));
     }
 
-    public function updateStatus(Request $request, $id)
-    {
-        $pendaftaran = Pendaftaran::findOrFail($id);
-        $pendaftaran->update(['status' => $request->status]);
-        return back()->with('success', 'Status berhasil diupdate!');
+    public function batalkan($id)
+{
+    $pendaftaran = Pendaftaran::where('id', $id)
+        ->where('user_id', Auth::id())
+        ->firstOrFail();
+
+    // Cek apakah sudah selesai
+    if ($pendaftaran->status === 'selesai') {
+        return back()->with('error', 'Antrian yang sudah selesai tidak bisa dibatalkan!');
     }
+
+    // Cek apakah sudah hari H
+    $today = now()->toDateString();
+    if ($pendaftaran->tanggal_kunjungan <= $today) {
+        return back()->with('error', 'Antrian tidak bisa dibatalkan pada hari kunjungan!');
+    }
+
+    $pendaftaran->update(['status' => 'batal']);
+
+    // Kirim notifikasi
+    \App\Models\Notifikasi::create([
+        'user_id'        => Auth::id(),
+        'judul'          => 'Antrian Berhasil Dibatalkan',
+        'pesan'          => 'Antrian kamu di ' . $pendaftaran->poli . ' pada tanggal ' .
+                            \Carbon\Carbon::parse($pendaftaran->tanggal_kunjungan)->format('d M Y') .
+                            ' telah dibatalkan.',
+        'tipe'           => 'status_berubah',
+        'pendaftaran_id' => $pendaftaran->id,
+    ]);
+
+    return back()->with('success', 'Antrian berhasil dibatalkan!');
+}
+
+public function cetakPDF($id)
+{
+    $pendaftaran = Pendaftaran::where('id', $id)
+        ->where('user_id', Auth::id())
+        ->firstOrFail();
+
+    $qrUrl = url('/verifikasi-antrian/' . $pendaftaran->id);
+    
+    $pdf = Pdf::loadView('pasien.cetak-antrian', compact('pendaftaran', 'qrUrl'))
+        ->setPaper('a5', 'portrait');
+        $pdf->getDomPDF()->set_option('isRemoteEnabled', true);
+        $pdf->getDomPDF()->set_option('isFontSubsettingEnabled', true);
+        $pdf->getDomPDF()->set_option('isRemoteEnabled', true);
+
+    $namaFile = 'bukti-antrian-' . str_replace(' ', '-', strtolower($pendaftaran->nama_pasien)) . '-no' . $pendaftaran->nomor_antrian . '.pdf';
+return $pdf->download($namaFile);
+}
+
+    public function updateStatus(Request $request, $id)
+{
+    $pendaftaran = Pendaftaran::findOrFail($id);
+    $pendaftaran->update(['status' => $request->status]);
+
+    // Kirim notifikasi ke pasien
+    $statusLabel = [
+        'menunggu' => 'Menunggu',
+        'selesai'  => 'Selesai',
+        'batal'    => 'Batal',
+    ];
+
+    \App\Models\Notifikasi::create([
+        'user_id'        => $pendaftaran->user_id,
+        'judul'          => 'Status Antrian Diupdate',
+        'pesan'          => 'Status antrian kamu pada tanggal ' . 
+                            \Carbon\Carbon::parse($pendaftaran->tanggal_kunjungan)->format('d M Y') . 
+                            ' telah diubah menjadi: ' . ($statusLabel[$request->status] ?? $request->status),
+        'tipe'           => 'status_berubah',
+        'pendaftaran_id' => $pendaftaran->id,
+    ]);
+
+    return back()->with('success', 'Status berhasil diupdate!');
+}
 }

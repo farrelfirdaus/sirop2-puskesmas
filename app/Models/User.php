@@ -35,4 +35,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(Pendaftaran::class);
     }
+    public function notifikasi()
+    {
+    return $this->hasMany(Notifikasi::class);
+    }
+
+    public function notifikasiBelumDibaca()
+    {
+    return $this->hasMany(Notifikasi::class)->where('dibaca', false);
+    }
 }

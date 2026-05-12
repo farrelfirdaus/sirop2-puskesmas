@@ -119,10 +119,35 @@
 
             {{-- Topbar --}}
             <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-                <span class="navbar-text ml-auto">
-                    Halo, <strong>{{ auth()->user()->name }}</strong>! 👋
-                </span>
-            </nav>
+    <ul class="navbar-nav ml-auto align-items-center">
+        <li class="nav-item mx-1" style="position:relative">
+            <a href="#" id="alertsDropdown" onclick="toggleNotif(event)">
+                <i class="fas fa-bell fa-fw" style="font-size:1.2rem"></i>
+                <span class="badge badge-danger" id="notif-count" 
+                    style="display:none; position:absolute; top:-5px; right:-5px; 
+                    border-radius:50%; padding:2px 6px; font-size:0.7rem">0</span>
+            </a>
+            <div id="notif-dropdown" 
+                style="display:none; position:absolute; right:0; top:30px; 
+                width:350px; max-height:400px; overflow-y:auto; 
+                background:white; border-radius:8px; 
+                box-shadow:0 4px 15px rgba(0,0,0,0.15); z-index:9999">
+                <div style="padding:10px 15px; font-weight:bold; 
+                    border-bottom:1px solid #eee; color:#4e73df">
+                    🔔 Notifikasi
+                </div>
+                <div id="notif-items">
+                    <div class="text-center p-3 text-muted">Memuat...</div>
+                </div>
+            </div>
+        </li>
+        <li class="nav-item">
+            <span class="navbar-text mx-3">
+                Halo, <strong>{{ auth()->user()->name }}</strong>! 👋
+            </span>
+        </li>
+    </ul>
+</nav>
 
             {{-- Main Content --}}
             <div class="container-fluid">
@@ -202,32 +227,52 @@
 
                 <div class="row">
     {{-- Antrian Aktif --}}
+{{-- Antrian Aktif --}}
 <div class="col-xl-4 col-lg-5 mb-4">
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Antrian Saat Ini</h6>
         </div>
-        <div class="card-body text-center">
-            @if($antrianAktif)
+        <div class="card-body">
+            {{-- Tab Poli --}}
+            <div style="display:flex; gap:8px; margin-bottom:20px">
+                <button onclick="gantiTab('Poli Umum', this)" id="tab-poli-umum"
+                    style="flex:1; padding:8px; border:none; border-radius:8px;
+                    background:#4e73df; color:white; cursor:pointer; font-weight:bold; font-size:0.75rem">
+                    Poli Umum
+                </button>
+                <button onclick="gantiTab('Poli Gigi', this)" id="tab-poli-gigi"
+                    style="flex:1; padding:8px; border:none; border-radius:8px;
+                    background:#e0e0e0; color:#666; cursor:pointer; font-weight:bold; font-size:0.75rem">
+                    Poli Gigi
+                </button>
+                <button onclick="gantiTab('Poli KIA', this)" id="tab-poli-kia"
+                    style="flex:1; padding:8px; border:none; border-radius:8px;
+                    background:#e0e0e0; color:#666; cursor:pointer; font-weight:bold; font-size:0.75rem">
+                    Poli KIA
+                </button>
+            </div>
+
+            {{-- Konten Antrian --}}
+            <div class="text-center">
                 <h1 class="display-4 font-weight-bold text-primary">
-                    No. {{ $antrianAktif->nomor_antrian }}
+                    No. <span id="angka-antrian">{{ $antrianPerPoli['Poli Umum']['sedang'] ?: '-' }}</span>
                 </h1>
-                <p class="mb-1">Nomor Antrian Kamu</p>
-                <p class="text-muted small">{{ $antrianAktif->poli }} — {{ \Carbon\Carbon::parse($antrianAktif->tanggal_kunjungan)->format('d M Y') }}</p>
-            @else
-                <h1 class="display-4 font-weight-bold text-muted">—</h1>
-                <p class="text-muted">Tidak ada antrian aktif hari ini</p>
-                
-            @endif
-            <hr>
-            <div class="d-flex justify-content-between px-4">
-                <div>
-                    <h5 class="text-success">{{ $sudahDilayani }}</h5>
-                    <small>Sudah Dilayani</small>
-                </div>
-                <div>
-                    <h5 class="text-danger">{{ $menunggu }}</h5>
-                    <small>Menunggu</small>
+                <p class="text-muted" id="label-poli">Poli Umum — {{ now()->format('d M Y') }}</p>
+                <hr>
+                <div style="display:flex; justify-content:space-around; padding:0 20px">
+                    <div>
+                        <h4 class="text-success font-weight-bold" id="sudah-dilayani">
+                            {{ $antrianPerPoli['Poli Umum']['sedang'] }}
+                        </h4>
+                        <small>Sudah Dilayani</small>
+                    </div>
+                    <div>
+                        <h4 class="text-danger font-weight-bold" id="menunggu-count">
+                            {{ $antrianPerPoli['Poli Umum']['menunggu'] }}
+                        </h4>
+                        <small>Menunggu</small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -287,6 +332,121 @@
         </div>
     </div>
 </div>
+<script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function loadNotifikasi() {
+    fetch('/notifikasi/jumlah')
+        .then(r => r.json())
+        .then(data => {
+            const badge = document.getElementById('notif-count');
+            if (data.jumlah > 0) {
+                badge.style.display = 'inline';
+                badge.innerText = data.jumlah;
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+}
+
+function toggleNotif(e) {
+    e.preventDefault();
+    const dropdown = document.getElementById('notif-dropdown');
+    if (dropdown.style.display === 'none') {
+        dropdown.style.display = 'block';
+        // Load notifikasi
+        fetch('/notifikasi')
+            .then(r => r.json())
+            .then(data => {
+                const container = document.getElementById('notif-items');
+                if (data.length === 0) {
+                    container.innerHTML = '<div class="text-center p-3 text-muted">Tidak ada notifikasi</div>';
+                    return;
+                }
+                container.innerHTML = data.map(n => `
+                    <a href="#" onclick="bacaNotif(${n.id}, this)" 
+                        style="display:flex; align-items:flex-start; padding:12px 15px; 
+                        border-bottom:1px solid #eee; text-decoration:none; color:#333;
+                        background:${n.dibaca ? 'white' : '#f8f9fc'}">
+                        <div style="margin-right:10px; margin-top:3px">
+                            <span style="width:35px; height:35px; border-radius:50%; 
+                                display:flex; align-items:center; justify-content:center;
+                                background:${n.tipe === 'jadwal_hari_ini' ? '#1cc88a' : n.tipe === 'jadwal_h1' ? '#f6c23e' : '#36b9cc'}">
+                                <i class="fas ${n.tipe === 'status_berubah' ? 'fa-check' : 'fa-calendar'}" 
+                                    style="color:white; font-size:0.8rem"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <div style="font-size:0.75rem; color:#999">${new Date(n.created_at).toLocaleDateString('id-ID')}</div>
+                            <div style="font-weight:bold; font-size:0.85rem">${n.judul}</div>
+                            <div style="font-size:0.8rem; color:#666">${n.pesan}</div>
+                        </div>
+                    </a>
+                `).join('');
+                document.getElementById('notif-count').style.display = 'none';
+            });
+    } else {
+        dropdown.style.display = 'none';
+    }
+}
+
+// Tutup dropdown kalau klik di luar
+document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('notif-dropdown');
+    const bell = document.getElementById('alertsDropdown');
+    if (!bell.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+let poliAktif = 'Poli Umum';
+
+let antrianData = {
+    'Poli Umum': {
+        sedang: {{ $antrianPerPoli['Poli Umum']['sedang'] }},
+        menunggu: {{ $antrianPerPoli['Poli Umum']['menunggu'] }}
+    },
+    'Poli Gigi': {
+        sedang: {{ $antrianPerPoli['Poli Gigi']['sedang'] }},
+        menunggu: {{ $antrianPerPoli['Poli Gigi']['menunggu'] }}
+    },
+    'Poli KIA': {
+        sedang: {{ $antrianPerPoli['Poli KIA']['sedang'] }},
+        menunggu: {{ $antrianPerPoli['Poli KIA']['menunggu'] }}
+    }
+};
+
+function gantiTab(poli, btn) {
+    poliAktif = poli;
+    document.querySelectorAll('[id^="tab-"]').forEach(b => {
+        b.style.background = '#e0e0e0';
+        b.style.color = '#666';
+    });
+    btn.style.background = '#4e73df';
+    btn.style.color = 'white';
+
+    const data = antrianData[poli];
+    document.getElementById('angka-antrian').innerText = data.sedang > 0 ? data.sedang : '-';
+    document.getElementById('label-poli').innerText = poli + ' — {{ now()->format("d M Y") }}';
+    document.getElementById('sudah-dilayani').innerText = data.sedang;
+    document.getElementById('menunggu-count').innerText = data.menunggu;
+}
+
+// Realtime: update setiap 10 detik
+function refreshAntrianRealtime() {
+    fetch('/api/antrian-realtime')
+        .then(r => r.json())
+        .then(data => {
+            antrianData = data;
+            const d = data[poliAktif];
+            document.getElementById('angka-antrian').innerText = d.sedang > 0 ? d.sedang : '-';
+            document.getElementById('sudah-dilayani').innerText = d.sedang;
+            document.getElementById('menunggu-count').innerText = d.menunggu;
+        });
+}
+
+setInterval(refreshAntrianRealtime, 10000); // setiap 10 detik
+</script>
 </body>
 </html>
