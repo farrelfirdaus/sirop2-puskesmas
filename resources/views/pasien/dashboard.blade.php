@@ -77,12 +77,6 @@
                 <span>Beranda</span>
             </a>
         </li>
-        <li class="nav-item {{ request()->routeIs('pasien.jadwal') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('pasien.jadwal') }}">
-                <i class="fas fa-fw fa-calendar"></i>
-                <span>Jadwal Dokter</span>
-            </a>
-        </li>
         <li class="nav-item {{ request()->routeIs('pendaftaran.create') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('pendaftaran.create') }}">
                 <i class="fas fa-fw fa-plus-circle"></i>
@@ -103,7 +97,7 @@
         </li>
         <hr class="sidebar-divider">
         <li class="nav-item">
-            <a class="nav-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+            <a class="nav-link" href="#" onclick="confirmLogout(event)">
                 <i class="fas fa-fw fa-sign-out-alt"></i>
                 <span>Logout</span>
             </a>
@@ -448,5 +442,25 @@ function refreshAntrianRealtime() {
 
 setInterval(refreshAntrianRealtime, 10000); // setiap 10 detik
 </script>
+<script>
+    function confirmLogout(event) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Yakin mau logout?',
+            text: 'Kamu akan keluar dari aplikasi.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Logout',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('logout-form').submit();
+            }
+        });
+    }
+</script>
+</body>
 </body>
 </html>

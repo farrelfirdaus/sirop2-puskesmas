@@ -18,13 +18,12 @@
         </a>
         <hr class="sidebar-divider my-0">
         <li class="nav-item"><a class="nav-link" href="{{ route('pasien.dashboard') }}"><i class="fas fa-fw fa-home"></i><span>Beranda</span></a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ route('pasien.jadwal') }}"><i class="fas fa-fw fa-calendar"></i><span>Jadwal Dokter</span></a></li>
         <li class="nav-item"><a class="nav-link" href="{{ route('pendaftaran.create') }}"><i class="fas fa-fw fa-plus-circle"></i><span>Daftar Antrian</span></a></li>
         <li class="nav-item active"><a class="nav-link" href="{{ route('pendaftaran.riwayat') }}"><i class="fas fa-fw fa-history"></i><span>Riwayat Kunjungan</span></a></li>
         <li class="nav-item"><a class="nav-link" href="{{ route('profil.edit') }}"><i class="fas fa-fw fa-user"></i><span>Profil Saya</span></a></li>
         <hr class="sidebar-divider">
         <li class="nav-item">
-            <a class="nav-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+            <a class="nav-link" href="#" onclick="confirmLogout(event)">
                 <i class="fas fa-fw fa-sign-out-alt"></i><span>Logout</span>
             </a>
             <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
@@ -37,20 +36,32 @@
                 <span class="navbar-text ml-auto">Halo, <strong>{{ auth()->user()->name }}</strong>! 👋</span>
             </nav>
 
-            <div class="container-fluid">
-                <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 class="h3 mb-0 text-gray-800">Riwayat Kunjungan</h1>
-                    <a href="{{ route('pendaftaran.create') }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus"></i> Daftar Antrian Baru
-                    </a>
-                </div>
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800 ml-3">Riwayat Kunjungan</h1>
+    <a href="{{ route('pendaftaran.create') }}" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus"></i> Daftar Antrian Baru
+    </a>
+</div>
+
 
                 @if(session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
 
                 <div class="card shadow mb-4">
-                    <div class="card-body">
+    <div class="card-body">
+
+        <div class="mb-3" style="max-width: 420px;">
+    <div style="display:flex; border: 1.5px solid #dee2e6; border-radius: 10px; overflow:hidden; background:white;">
+        <input type="text" id="searchInput" 
+            style="flex:1; border:none; outline:none; padding: 10px 16px; font-size:0.95rem; color:#6c757d; background:transparent;"
+            placeholder="Search for...">
+        <button style="background:#4e73df; border:none; padding: 10px 18px; cursor:pointer;">
+            <i class="fas fa-search" style="color:white; font-size:0.9rem"></i>
+        </button>
+    </div>
+</div>
+
                         @if($riwayat->isEmpty())
                             <div class="text-center py-5">
                                 <i class="fas fa-history fa-3x text-gray-300 mb-3"></i>
@@ -102,7 +113,7 @@
                                                 @elseif($r->status == 'selesai')
                                                     <span class="badge badge-success">Selesai</span>
                                                 @else
-                                                    <span class="badge badge-danger">Batal</span>
+                                                    <span class="badge badge-danger">Dibatalkan</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -156,5 +167,37 @@
     </div>
 </div>
 <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Search filter
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const keyword = this.value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(keyword) ? '' : 'none';
+        });
+    });
+
+    // Logout konfirmasi
+    function confirmLogout(event) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Yakin mau logout?',
+            text: 'Kamu akan keluar dari aplikasi.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Logout',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('logout-form').submit();
+            }
+        });
+    }
+</script>
+</body>
 </body>
 </html>
