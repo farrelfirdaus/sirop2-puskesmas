@@ -1,81 +1,89 @@
 <!-- Sidebar -->
-<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+<ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar"
+    style="background: linear-gradient(180deg, #2c4ec9 0%, #1a3aad 100%); min-height: 100vh;">
 
     <!-- Sidebar Brand -->
-    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('dashboard') }}">
-        <div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-hospital"></i>
+    <a class="sidebar-brand d-flex align-items-center justify-content-center py-4" href="{{ route('dashboard') }}"
+        style="text-decoration: none; color: white;">
+        <div class="sidebar-brand-icon mr-2">
+            <i class="fas fa-hospital" style="font-size: 1.5rem;"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">SIROP</div>
+        <div class="sidebar-brand-text font-weight-bold" style="font-size: 1.3rem; letter-spacing: 1px;">SIROP</div>
     </a>
 
-    <hr class="sidebar-divider my-0">
+    <hr class="sidebar-divider my-0" style="border-color: rgba(255,255,255,0.2);">
 
     <!-- Dashboard -->
     <li class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('dashboard') }}">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
+        <a class="nav-link d-flex align-items-center py-3 px-4" href="{{ route('dashboard') }}"
+            style="color: rgba(255,255,255,0.85); font-size: 0.9rem;">
+            <i class="fas fa-fw fa-home mr-3" style="font-size: 1rem;"></i>
             <span>Dashboard</span>
         </a>
     </li>
 
-    <hr class="sidebar-divider">
-
-    <div class="sidebar-heading">Data</div>
-
     <!-- Data Pasien -->
     <li class="nav-item {{ request()->routeIs('pasien.*') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('pasien.index') }}">
-            <i class="fas fa-fw fa-users"></i>
+        <a class="nav-link d-flex align-items-center py-3 px-4" href="{{ route('pasien.index') }}"
+            style="color: rgba(255,255,255,0.85); font-size: 0.9rem;">
+            <i class="fas fa-fw fa-user mr-3" style="font-size: 1rem;"></i>
             <span>Data Pasien</span>
         </a>
     </li>
-    {{-- Kelola Dokter --}}
-<li class="nav-item {{ request()->routeIs('dokter.*') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('dokter.index') }}">
-        <i class="fas fa-fw fa-user-md"></i>
-        <span>Kelola Dokter</span>
-    </a>
-</li>
 
-{{-- Data Pendaftaran --}}
-<li class="nav-item {{ request()->routeIs('pendaftaran.admin') ? 'active' : '' }}">
-    <a class="nav-link" href="{{ route('pendaftaran.admin') }}">
-        <i class="fas fa-fw fa-clipboard-list"></i>
-        <span>Data Pendaftaran</span>
-    </a>
-</li>
-<!-- Nav Item - Laporan -->
-<li class="nav-item">
-    <a class="nav-link" href="#">
-        <i class="fas fa-fw fa-notes-medical"></i>
-        <span>Laporan</span>
-    </a>
-</li>
-    <hr class="sidebar-divider">
-
-    <div class="sidebar-heading">Akun</div>
+    <!-- Antrian -->
+    <li class="nav-item {{ request()->routeIs('antrian.*') ? 'active' : '' }}">
+        <a class="nav-link d-flex align-items-center py-3 px-4" href="{{ route('antrian.index') }}"
+            style="color: rgba(255,255,255,0.85); font-size: 0.9rem;">
+            <i class="fas fa-fw fa-clipboard-list mr-3" style="font-size: 1rem;"></i>
+            <span>Antrian</span>
+        </a>
+    </li>
 
     <!-- Logout -->
-<li class="nav-item">
-    <a class="nav-link" href="#" onclick="confirmLogout()">
-        <i class="fas fa-fw fa-sign-out-alt"></i>
-        <span>Logout</span>
-    </a>
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
-        @csrf
-    </form>
-</li>
+    <li class="nav-item">
+        <a class="nav-link d-flex align-items-center py-3 px-4" href="#" onclick="confirmLogout()"
+            style="color: rgba(255,255,255,0.85); font-size: 0.9rem; cursor: pointer;">
+            <i class="fas fa-fw fa-sign-out-alt mr-3" style="font-size: 1rem;"></i>
+            <span>Logout</span>
+        </a>
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+            @csrf
+        </form>
+    </li>
 
-    <hr class="sidebar-divider d-none d-md-block">
+    <hr class="sidebar-divider" style="border-color: rgba(255,255,255,0.2);">
 
-    <div class="text-center d-none d-md-inline">
-        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    <!-- Sidebar Toggle Button -->
+    <div class="text-center d-none d-md-inline pb-3">
+        <button class="rounded-circle border-0" id="sidebarToggle"
+            style="width: 28px; height: 28px; background: rgba(255,255,255,0.2); color: white; cursor: pointer;">
+            <i class="fas fa-chevron-left" style="font-size: 0.7rem;"></i>
+        </button>
     </div>
 
 </ul>
 
-<!-- SweetAlert2 -->
+<style>
+    #accordionSidebar .nav-item.active .nav-link {
+        color: white !important;
+        font-weight: 600 !important;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        margin: 0 12px;
+        padding-left: 12px !important;
+    }
+    #accordionSidebar .nav-link:hover {
+        color: white !important;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        margin: 0 12px;
+        padding-left: 12px !important;
+        transition: all 0.2s ease;
+    }
+    .sidebar { transition: width 0.3s ease; }
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function confirmLogout() {
@@ -84,7 +92,7 @@
             text: 'Kamu akan keluar dari aplikasi.',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
+            confirmButtonColor: '#2c4ec9',
             cancelButtonColor: '#6c757d',
             confirmButtonText: 'Ya, Logout',
             cancelButtonText: 'Batal'

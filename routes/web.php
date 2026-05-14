@@ -10,6 +10,7 @@ use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\PasienDashboardController;
 use App\Http\Controllers\NotifikasiController;
+use App\Http\Controllers\AntrianController;
 
 // Redirect ke login
 Route::get('/', function () {
@@ -38,6 +39,14 @@ Route::middleware(['auth', 'admin'])->group(function () {
         ->name('pendaftaran.admin');
     Route::patch('/pendaftaran/{id}/status', [PendaftaranController::class, 'updateStatus'])
         ->name('pendaftaran.updateStatus');
+    // Antrian
+    Route::get('/antrian', [AntrianController::class, 'index'])->name('antrian.index');
+    Route::post('/antrian/tambah', [AntrianController::class, 'tambah'])->name('antrian.tambah');
+    Route::post('/antrian/panggil-berikutnya', [AntrianController::class, 'panggilBerikutnya'])->name('antrian.panggilBerikutnya');
+    Route::post('/antrian/selesai', [AntrianController::class, 'selesai'])->name('antrian.selesai');
+    Route::post('/antrian/lewati', [AntrianController::class, 'lewati'])->name('antrian.lewati');
+    Route::post('/antrian/panggil-ulang', [AntrianController::class, 'panggilUlang'])->name('antrian.panggilUlang');
+    Route::get('/antrian/data', [AntrianController::class, 'getData'])->name('antrian.getData');
 });
 
 // =====================
