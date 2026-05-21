@@ -102,22 +102,47 @@
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Antrian Saat Ini</h6>
             </div>
-           <div class="card-body text-center">
-    <h1 class="display-4 font-weight-bold text-primary">
-        A-0{{ str_pad($nomorAntrian, 2, '0', STR_PAD_LEFT) }}
-    </h1>
-    <p class="mb-2">Nomor Antrian Saat Ini</p>
-    <hr>
-    <div class="d-flex justify-content-between px-4">
-        <div>
-            <h5 class="text-success">{{ $sudahDilayani }}</h5>
-            <small>Sudah Dilayani</small>
-        </div>
-        <div>
-            <h5 class="text-danger">{{ $menunggu }}</h5>
-            <small>Menunggu</small>
+           <div class="card-body">
+    {{-- Tab Poli --}}
+    <div style="display:flex; gap:8px; margin-bottom:20px">
+        <button onclick="gantiTabAdmin('Poli Umum', this)" id="admin-tab-poli-umum"
+            style="flex:1; padding:8px; border:none; border-radius:8px;
+            background:#4e73df; color:white; cursor:pointer; font-weight:bold; font-size:0.75rem">
+            Poli Umum
+        </button>
+        <button onclick="gantiTabAdmin('Poli Gigi', this)" id="admin-tab-poli-gigi"
+            style="flex:1; padding:8px; border:none; border-radius:8px;
+            background:#e0e0e0; color:#666; cursor:pointer; font-weight:bold; font-size:0.75rem">
+            Poli Gigi
+        </button>
+        <button onclick="gantiTabAdmin('Poli KIA', this)" id="admin-tab-poli-kia"
+            style="flex:1; padding:8px; border:none; border-radius:8px;
+            background:#e0e0e0; color:#666; cursor:pointer; font-weight:bold; font-size:0.75rem">
+            Poli KIA
+        </button>
+    </div>
+    <div class="text-center">
+        <h1 class="display-4 font-weight-bold text-primary">
+            No. <span id="admin-angka-antrian">{{ $antrianPerPoli['Poli Umum']['sedang'] ?: '-' }}</span>
+        </h1>
+        <p class="text-muted" id="admin-label-poli">Poli Umum — {{ now()->format('d M Y') }}</p>
+        <hr>
+        <div style="display:flex; justify-content:space-around; padding:0 20px">
+            <div>
+                <h5 class="text-success" id="admin-sudah-dilayani">
+                    {{ $antrianPerPoli['Poli Umum']['sedang'] }}
+                </h5>
+                <small>Sudah Dilayani</small>
+            </div>
+            <div>
+                <h5 class="text-danger" id="admin-menunggu-count">
+                    {{ $antrianPerPoli['Poli Umum']['menunggu'] }}
+                </h5>
+                <small>Menunggu</small>
+            </div>
         </div>
     </div>
+</div>
 </div>
         </div>
     </div>
@@ -144,6 +169,54 @@
             }
         }
     });
+</script>
+<script>
+// Antrian per poli admin
+let adminPoliAktif = 'Poli Umum';
+let adminAntrianData = {
+    'Poli Umum': {
+        sedang: {{ $antrianPerPoli['Poli Umum']['sedang'] }},
+        menunggu: {{ $antrianPerPoli['Poli Umum']['menunggu'] }}
+    },
+    'Poli Gigi': {
+        sedang: {{ $antrianPerPoli['Poli Gigi']['sedang'] }},
+        menunggu: {{ $antrianPerPoli['Poli Gigi']['menunggu'] }}
+    },
+    'Poli KIA': {
+        sedang: {{ $antrianPerPoli['Poli KIA']['sedang'] }},
+        menunggu: {{ $antrianPerPoli['Poli KIA']['menunggu'] }}
+    }
+};
+
+function gantiTabAdmin(poli, btn) {
+    adminPoliAktif = poli;
+    document.querySelectorAll('[id^="admin-tab-"]').forEach(b => {
+        b.style.background = '#e0e0e0';
+        b.style.color = '#666';
+    });
+    btn.style.background = '#4e73df';
+    btn.style.color = 'white';
+
+    const data = adminAntrianData[poli];
+    document.getElementById('admin-angka-antrian').innerText = data.sedang > 0 ? data.sedang : '-';
+    document.getElementById('admin-label-poli').innerText = poli + ' — {{ now()->format("d M Y") }}';
+    document.getElementById('admin-sudah-dilayani').innerText = data.sedang;
+    document.getElementById('admin-menunggu-count').innerText = data.menunggu;
+}
+
+function refreshAdminAntrian() {
+    fetch('/api/antrian-realtime')
+        .then(r => r.json())
+        .then(data => {
+            adminAntrianData = data;
+            const d = data[adminPoliAktif];
+            document.getElementById('admin-angka-antrian').innerText = d.sedang > 0 ? d.sedang : '-';
+            document.getElementById('admin-sudah-dilayani').innerText = d.sedang;
+            document.getElementById('admin-menunggu-count').innerText = d.menunggu;
+        });
+}
+
+setInterval(refreshAdminAntrian, 10000);
 </script>
 @endpush
 

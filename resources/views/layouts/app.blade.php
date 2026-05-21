@@ -15,6 +15,20 @@
 
     <!-- Custom styles-->
     <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet">
+
+    <style>
+    /* Override style.css yang merusak layout admin */
+    body {
+        display: block !important;
+        justify-content: unset !important;
+        align-items: unset !important;
+        min-height: unset !important;
+        background: #f8f9fc !important;
+    }
+    footer.sticky-footer {
+        text-align: center;
+    }
+</style>
 </head>
 
 <body id="page-top">
@@ -43,13 +57,7 @@
             <!-- End of Main Content -->
 
             <!-- Footer -->
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; SIROP 2026</span>
-                    </div>
-                </div>
-            </footer>
+            @include('partials.footer')
             <!-- End of Footer -->
 
         </div>
