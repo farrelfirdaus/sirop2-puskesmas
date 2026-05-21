@@ -66,17 +66,15 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Nama Lengkap</label>
-                                        <input type="text" class="form-control"
-                                            value="{{ $user->name }}" disabled>
-                                        <small class="text-muted">Nama tidak bisa diubah</small>
+                                        <input type="text" name="name" class="form-control"
+                                            value="{{ old('name', $user->name) }}" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Email</label>
-                                        <input type="email" class="form-control"
-                                            value="{{ $user->email }}" disabled>
-                                        <small class="text-muted">Email tidak bisa diubah</small>
+                                        <input type="email" name="email" class="form-control"
+                                            value="{{ old('email', $user->email) }}" required>
                                     </div>
                                 </div>
                             </div>
@@ -85,8 +83,9 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>NIK</label>
-                                        <input type="text" name="nik" class="form-control"
-                                            value="{{ old('nik', $user->nik) }}" required>
+                                        <input type="text" class="form-control"
+                                            value="{{ $user->nik }}" disabled>
+                                        <small class="text-muted">NIK tidak bisa diubah</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -185,17 +184,6 @@
 <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Search filter
-    document.getElementById('searchInput').addEventListener('keyup', function() {
-        const keyword = this.value.toLowerCase();
-        const rows = document.querySelectorAll('tbody tr');
-        rows.forEach(row => {
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(keyword) ? '' : 'none';
-        });
-    });
-
-    // Logout konfirmasi
     function confirmLogout(event) {
         event.preventDefault();
         Swal.fire({
@@ -214,6 +202,5 @@
         });
     }
 </script>
-</body>
 </body>
 </html>
