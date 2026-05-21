@@ -26,6 +26,8 @@ class Pendaftaran extends Model
         'nomor_antrian',
         'untuk',
         'status',
+        'jenis_pembayaran',
+        'nama_asuransi',
     ];
 
     public function dokter()

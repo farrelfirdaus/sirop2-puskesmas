@@ -181,14 +181,15 @@
                                 </div>
                             </div>
 
-                            {{-- Pilih Poli & Jadwal --}}
+                            
+{{-- Pilih Poli & Jadwal --}}
 <div class="card mb-4">
     <div class="card-header bg-light">
         <h6 class="m-0 font-weight-bold text-secondary">Pilih Poli & Jadwal</h6>
     </div>
     <div class="card-body">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="form-group">
                     <label>Pilih Poli</label>
                     <select name="poli" class="form-control" required>
@@ -199,22 +200,70 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Tanggal Kunjungan</label>
-                                                <input type="date" name="tanggal_kunjungan" class="form-control"
-                                                    value="{{ old('tanggal_kunjungan') }}"
-                                                    min="{{ date('Y-m-d') }}" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Keluhan</label>
-                                        <textarea name="keluhan" class="form-control" rows="3"
-                                            placeholder="Deskripsikan keluhan kamu" required>{{ old('keluhan') }}</textarea>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Tanggal Kunjungan</label>
+                    <input type="date" name="tanggal_kunjungan" class="form-control"
+                        value="{{ old('tanggal_kunjungan') }}"
+                        min="{{ date('Y-m-d') }}" required>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Jenis Pembayaran</label>
+                    <select name="jenis_pembayaran" class="form-control" required
+                            onchange="toggleAsuransi(this.value)">
+                        <option value="">-- Pilih --</option>
+                        <option value="umum" {{ old('jenis_pembayaran') == 'umum' ? 'selected' : '' }}>Umum</option>
+                        <option value="bpjs" {{ old('jenis_pembayaran') == 'bpjs' ? 'selected' : '' }}>BPJS Kesehatan</option>
+                        <option value="asuransi" {{ old('jenis_pembayaran') == 'asuransi' ? 'selected' : '' }}>Asuransi</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+       {{-- Nama Asuransi, muncul kalau pilih Asuransi --}}
+<div class="row" id="row-asuransi" style="display: {{ old('jenis_pembayaran') == 'asuransi' ? 'flex' : 'none' }};">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label>Nama Asuransi</label>
+
+            {{-- Dropdown --}}
+            <select class="form-control" id="input-asuransi"
+                    onchange="toggleInputAsuransi(this.value)"
+                    name="nama_asuransi">
+                <option value="">-- Pilih Asuransi --</option>
+                <option value="Allianz" {{ old('nama_asuransi') == 'Allianz' ? 'selected' : '' }}>Allianz</option>
+                <option value="AXA Mandiri" {{ old('nama_asuransi') == 'AXA Mandiri' ? 'selected' : '' }}>AXA Mandiri</option>
+                <option value="Prudential" {{ old('nama_asuransi') == 'Prudential' ? 'selected' : '' }}>Prudential</option>
+                <option value="Manulife" {{ old('nama_asuransi') == 'Manulife' ? 'selected' : '' }}>Manulife</option>
+                <option value="Cigna" {{ old('nama_asuransi') == 'Cigna' ? 'selected' : '' }}>Cigna</option>
+                <option value="Lainnya">Lainnya</option>
+            </select>
+
+            {{-- Input text, muncul menggantikan dropdown kalau pilih Lainnya --}}
+            <input type="text" class="form-control" id="input-asuransi-lainnya"
+                   name="nama_asuransi"
+                   placeholder="Tulis nama asuransi kamu"
+                   value="{{ old('nama_asuransi') }}"
+                   style="display: none;">
+
+            {{-- Tombol kembali ke dropdown --}}
+            <small id="link-kembali-asuransi" style="display:none;">
+                <a href="#" onclick="kembaliKeDropdown(); return false;">
+                    ← Pilih dari daftar
+                </a>
+            </small>
+        </div>
+    </div>
+</div>
+        <div class="form-group">
+            <label>Keluhan</label>
+            <textarea name="keluhan" class="form-control" rows="3"
+                placeholder="Deskripsikan keluhan kamu" required>{{ old('keluhan') }}</textarea>
+        </div>
+    </div>
+</div>
 
                             <button type="submit" class="btn btn-primary btn-block">
                                 <i class="fas fa-check"></i> Daftar Antrian
@@ -322,6 +371,39 @@
             }
         });
     }
+    function toggleAsuransi(val) {
+    const row = document.getElementById('row-asuransi');
+    const input = document.getElementById('input-asuransi');
+    if (val === 'asuransi') {
+        row.style.display = 'flex';
+        input.setAttribute('required', 'required');
+    } else {
+        row.style.display = 'none';
+        input.removeAttribute('required');
+    }
+}
+function toggleInputAsuransi(val) {
+    if (val === 'Lainnya') {
+        document.getElementById('input-asuransi').style.display = 'none';
+        document.getElementById('input-asuransi').removeAttribute('name');
+        document.getElementById('input-asuransi-lainnya').style.display = 'block';
+        document.getElementById('input-asuransi-lainnya').setAttribute('name', 'nama_asuransi');
+        document.getElementById('input-asuransi-lainnya').setAttribute('required', 'required');
+        document.getElementById('input-asuransi-lainnya').focus();
+        document.getElementById('link-kembali-asuransi').style.display = 'block';
+    }
+}
+
+function kembaliKeDropdown() {
+    document.getElementById('input-asuransi').style.display = 'block';
+    document.getElementById('input-asuransi').setAttribute('name', 'nama_asuransi');
+    document.getElementById('input-asuransi').value = '';
+    document.getElementById('input-asuransi-lainnya').style.display = 'none';
+    document.getElementById('input-asuransi-lainnya').removeAttribute('name');
+    document.getElementById('input-asuransi-lainnya').removeAttribute('required');
+    document.getElementById('input-asuransi-lainnya').value = '';
+    document.getElementById('link-kembali-asuransi').style.display = 'none';
+}
 </script>
 </body>
 </body>
