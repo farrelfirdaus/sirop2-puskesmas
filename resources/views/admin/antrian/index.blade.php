@@ -33,8 +33,8 @@
 
                 <div class="input-group mb-3">
                     <input type="text" class="form-control bg-light border-0"
-                           id="searchPasien" placeholder="Search"
-                           onkeyup="filterPasien()">
+                         id="searchPasien" placeholder="Search"
+                         oninput="filterPasien()">
                     <div class="input-group-append">
                         <button class="btn btn-primary" type="button">
                             <i class="fas fa-search fa-sm"></i>
@@ -47,7 +47,8 @@
                     <div class="pasien-item d-flex align-items-center p-2 mb-2 rounded"
                          style="cursor:pointer; border:1px solid #e3e6f0; transition:background .2s;"
                          onclick="pilihPasien('{{ addslashes($pasien->nama_pasien) }}', '{{ $pasien->nik_pasien }}', this)"
-                         data-nama="{{ strtolower($pasien->nama_pasien) }}">
+                         data-nama="{{ strtolower($pasien->nama_pasien) }}"
+                         data-nik="{{ strtolower($pasien->nik_pasien) }}">
                         <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center mr-3"
                              style="width:36px;height:36px;flex-shrink:0;">
                             <i class="fas fa-user text-white" style="font-size:14px;"></i>
@@ -255,13 +256,19 @@
         btn.classList.add('btn-primary');
     }
 
-    // Filter pasien
-    function filterPasien() {
-        const val = document.getElementById('searchPasien').value.toLowerCase();
-        document.querySelectorAll('.pasien-item').forEach(el => {
-            el.style.display = el.dataset.nama.includes(val) ? '' : 'none';
-        });
-    }
+   // Filter pasien
+   function filterPasien() {
+    const val = document.getElementById('searchPasien').value.toLowerCase().trim();
+    document.querySelectorAll('.pasien-item').forEach(el => {
+        const nama = el.getAttribute('data-nama') || '';
+        const nik  = el.getAttribute('data-nik') || '';
+        if (nama.includes(val) || nik.includes(val)) {
+            el.classList.remove('pasien-hidden');
+        } else {
+            el.classList.add('pasien-hidden');
+        }
+    });
+}
 
     // Helper CSRF
     function getCsrf() {
@@ -334,7 +341,10 @@
     }
 
     // Load pertama kali & auto-refresh tiap 10 detik
-    loadData();
+   loadData();
     setInterval(loadData, 10000);
 </script>
+<style>
+    .pasien-hidden { display: none !important; }
+</style>
 @endpush
