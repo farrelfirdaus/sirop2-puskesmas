@@ -57,7 +57,7 @@
             <!-- End of Main Content -->
 
             <!-- Footer -->
-            @include('partials.footer')
+            
             <!-- End of Footer -->
 
         </div>
