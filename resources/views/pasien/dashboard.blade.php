@@ -1,148 +1,25 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beranda Pasien — SIROP</title>
-    <link rel="stylesheet" href="{{ asset('css/sb-admin-2.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-    /* Full screen wrapper */
-    html, body, #wrapper {
-        height: 100%;
-        width: 100%;
-    }
-
-    #wrapper {
-        display: flex !important;
-        overflow: hidden;
-    }
-
-    /* Sidebar fixed height */
-    .sidebar {
-        min-height: 100vh;
-        height: 100%;
-    }
-
-    /* Content wrapper fill sisa layar */
-    #content-wrapper {
-        flex: 1 !important;
-        min-width: 0;
-        overflow-y: auto;
-        height: 100vh;
-    }
-
-    /* Responsive mobile */
-    @media (max-width: 768px) {
-        #wrapper {
-            flex-direction: column !important;
-        }
-
-        .sidebar {
-            width: 100% !important;
-            min-height: auto !important;
-            height: auto !important;
-        }
-
-        #content-wrapper {
-            height: auto !important;
-        }
-
-        .container-fluid {
-            padding: 12px !important;
-        }
-
-        .col-xl-4 {
-            margin-bottom: 12px;
-        }
-    }
-</style>
+    @include('pasien.partials.head')
 </head>
 <body id="page-top">
 <div id="wrapper">
 
-    {{-- Sidebar --}}
-    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('pasien.dashboard') }}">
-            <div class="sidebar-brand-icon">
-                <i class="fas fa-hospital"></i>
-            </div>
-            <div class="sidebar-brand-text mx-3">SIROP</div>
-        </a>
-        <hr class="sidebar-divider my-0">
-        <li class="nav-item {{ request()->routeIs('pasien.dashboard') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('pasien.dashboard') }}">
-                <i class="fas fa-fw fa-home"></i>
-                <span>Beranda</span>
-            </a>
-        </li>
-        <li class="nav-item {{ request()->routeIs('pendaftaran.create') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('pendaftaran.create') }}">
-                <i class="fas fa-fw fa-plus-circle"></i>
-                <span>Daftar Antrian</span>
-            </a>
-        </li>
-        <li class="nav-item {{ request()->routeIs('pendaftaran.riwayat') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('pendaftaran.riwayat') }}">
-                <i class="fas fa-fw fa-history"></i>
-                <span>Riwayat Kunjungan</span>
-            </a>
-        </li>
-        <li class="nav-item {{ request()->routeIs('profil.edit') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('profil.edit') }}">
-                <i class="fas fa-fw fa-user"></i>
-                <span>Profil Saya</span>
-            </a>
-        </li>
-        <hr class="sidebar-divider">
-        <li class="nav-item">
-            <a class="nav-link" href="#" onclick="confirmLogout(event)">
-                <i class="fas fa-fw fa-sign-out-alt"></i>
-                <span>Logout</span>
-            </a>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                @csrf
-            </form>
-        </li>
-    </ul>
+    @include('pasien.partials.sidebar')
 
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            @include('pasien.partials.navbar')
+
+            {{-- konten dashboard tetap sama --}}
+</head>
+<body id="page-top">
+<div id="wrapper">
     {{-- Content Wrapper --}}
     <div id="content-wrapper" class="d-flex flex-column">
         <div id="content">
-
-            {{-- Topbar --}}
-            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-    <ul class="navbar-nav ml-auto align-items-center">
-        <li class="nav-item mx-1" style="position:relative">
-            <a href="#" id="alertsDropdown" onclick="toggleNotif(event)">
-                <i class="fas fa-bell fa-fw" style="font-size:1.2rem"></i>
-                <span class="badge badge-danger" id="notif-count" 
-                    style="display:none; position:absolute; top:-5px; right:-5px; 
-                    border-radius:50%; padding:2px 6px; font-size:0.7rem">0</span>
-            </a>
-            <div id="notif-dropdown" 
-                style="display:none; position:absolute; right:0; top:30px; 
-                width:350px; max-height:400px; overflow-y:auto; 
-                background:white; border-radius:8px; 
-                box-shadow:0 4px 15px rgba(0,0,0,0.15); z-index:9999">
-                <div style="padding:10px 15px; font-weight:bold; 
-                    border-bottom:1px solid #eee; color:#4e73df">
-                    🔔 Notifikasi
-                </div>
-                <div id="notif-items">
-                    <div class="text-center p-3 text-muted">Memuat...</div>
-                </div>
-            </div>
-        </li>
-        <li class="nav-item">
-            <span class="navbar-text mx-3">
-                Halo, <strong>{{ auth()->user()->name }}</strong>! 👋
-            </span>
-        </li>
-    </ul>
-</nav>
-
             {{-- Main Content --}}
             <div class="container-fluid">
 
@@ -331,69 +208,6 @@
 <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-function loadNotifikasi() {
-    fetch('/notifikasi/jumlah')
-        .then(r => r.json())
-        .then(data => {
-            const badge = document.getElementById('notif-count');
-            if (data.jumlah > 0) {
-                badge.style.display = 'inline';
-                badge.innerText = data.jumlah;
-            } else {
-                badge.style.display = 'none';
-            }
-        });
-}
-
-function toggleNotif(e) {
-    e.preventDefault();
-    const dropdown = document.getElementById('notif-dropdown');
-    if (dropdown.style.display === 'none') {
-        dropdown.style.display = 'block';
-        // Load notifikasi
-        fetch('/notifikasi')
-            .then(r => r.json())
-            .then(data => {
-                const container = document.getElementById('notif-items');
-                if (data.length === 0) {
-                    container.innerHTML = '<div class="text-center p-3 text-muted">Tidak ada notifikasi</div>';
-                    return;
-                }
-                container.innerHTML = data.map(n => `
-                    <a href="#" onclick="bacaNotif(${n.id}, this)" 
-                        style="display:flex; align-items:flex-start; padding:12px 15px; 
-                        border-bottom:1px solid #eee; text-decoration:none; color:#333;
-                        background:${n.dibaca ? 'white' : '#f8f9fc'}">
-                        <div style="margin-right:10px; margin-top:3px">
-                            <span style="width:35px; height:35px; border-radius:50%; 
-                                display:flex; align-items:center; justify-content:center;
-                                background:${n.tipe === 'jadwal_hari_ini' ? '#1cc88a' : n.tipe === 'jadwal_h1' ? '#f6c23e' : '#36b9cc'}">
-                                <i class="fas ${n.tipe === 'status_berubah' ? 'fa-check' : 'fa-calendar'}" 
-                                    style="color:white; font-size:0.8rem"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <div style="font-size:0.75rem; color:#999">${new Date(n.created_at).toLocaleDateString('id-ID')}</div>
-                            <div style="font-weight:bold; font-size:0.85rem">${n.judul}</div>
-                            <div style="font-size:0.8rem; color:#666">${n.pesan}</div>
-                        </div>
-                    </a>
-                `).join('');
-                document.getElementById('notif-count').style.display = 'none';
-            });
-    } else {
-        dropdown.style.display = 'none';
-    }
-}
-
-// Tutup dropdown kalau klik di luar
-document.addEventListener('click', function(e) {
-    const dropdown = document.getElementById('notif-dropdown');
-    const bell = document.getElementById('alertsDropdown');
-    if (!bell.contains(e.target) && !dropdown.contains(e.target)) {
-        dropdown.style.display = 'none';
-    }
-});
 let poliAktif = 'Poli Umum';
 
 let antrianData = {

@@ -9,8 +9,21 @@ class PasienController extends Controller
 {
     public function index()
     {
-        $pasien = DB::table('pasien')->get();
-        return view('pasien.index', compact('pasien'));
+       $dariTabelPasien = DB::table('pasien')
+    ->select('nik', 'nama', 'tempat_lahir', 'tanggal_lahir', 'alamat', 'no_hp', 'agama', 'pendidikan_terakhir', 'pekerjaan', 'golongan_darah')
+    ->get();
+
+$nikYangSudahAda = $dariTabelPasien->pluck('nik')->toArray();
+
+$dariPendaftaran = DB::table('pendaftaran')
+    ->select('nik_pasien as nik', 'nama_pasien as nama', 'tempat_lahir', 'tanggal_lahir', 'alamat', 'no_hp', 'agama', 'pendidikan_terakhir', 'pekerjaan', 'golongan_darah')
+    ->whereNotIn('nik_pasien', $nikYangSudahAda)
+    ->groupBy('nik_pasien', 'nama_pasien', 'tempat_lahir', 'tanggal_lahir', 'alamat', 'no_hp', 'agama', 'pendidikan_terakhir', 'pekerjaan', 'golongan_darah')
+    ->get();
+
+$pasien = $dariTabelPasien->merge($dariPendaftaran);
+
+return view('pasien.index', compact('pasien'));
     }
 
     public function create()
