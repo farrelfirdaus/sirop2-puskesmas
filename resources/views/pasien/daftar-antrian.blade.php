@@ -286,7 +286,7 @@
             setSelect('input_pendidikan', profilUser.pendidikan_terakhir);
             setSelect('input_golongan_darah', profilUser.golongan_darah);
 
-            document.getElementById('label-data-pasien').innerText = 'Data Pasien (Data Kamu)';
+            document.getElementById('label-data-pasien').innerText = 'Data Pasien';
         } else {
             // Kosongkan semua field
             document.getElementById('input_nama').value = '';
