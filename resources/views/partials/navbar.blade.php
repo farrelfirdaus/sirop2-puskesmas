@@ -7,19 +7,10 @@
         <i class="fa fa-bars" style="color: #555;"></i>
     </button>
 
-    <!-- Search Bar -->
-    <div class="d-none d-sm-flex align-items-center" style="flex: 1; max-width: 400px;">
-        <div class="input-group">
-            <input type="text" class="form-control border-0 bg-light"
-                placeholder="Search for..."
-                style="border-radius: 8px 0 0 8px; background: #f1f3f9 !important; font-size: 0.9rem; padding: 0.5rem 1rem;">
-            <div class="input-group-append">
-                <button class="btn" style="background: #2c4ec9; border-radius: 0 8px 8px 0; padding: 0.5rem 1rem;">
-                    <i class="fas fa-search" style="color: white; font-size: 0.85rem;"></i>
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- Custom Navbar Content (per halaman) -->
+<div class="d-none d-sm-flex align-items-center" style="flex: 1; max-width: 600px;">
+    @yield('navbar_content')
+</div>
 
     <!-- Right Side Icons -->
     <ul class="navbar-nav ml-auto align-items-center">

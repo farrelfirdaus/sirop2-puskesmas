@@ -2,6 +2,29 @@
 
 @section('title', 'Antrian Pasien')
 
+@section('navbar_content')
+<div class="d-flex align-items-center" style="gap: 8px;">
+    <span style="font-size: 0.85rem; color: #555; white-space: nowrap;">Lihat antrian:</span>
+    <button onclick="shiftDay(-1)" class="btn btn-sm btn-light border" style="padding: 4px 10px;">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    <div style="position: relative;">
+        <i class="fas fa-calendar-alt" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#aaa; font-size:0.85rem; pointer-events:none;"></i>
+        <input type="date" id="filterTanggal" class="form-control border-0 bg-light"
+               value="{{ date('Y-m-d') }}"
+               onchange="gantiTanggal(this.value)"
+               style="padding-left: 32px; font-size: 0.85rem; border-radius: 8px; width: 160px;">
+    </div>
+    <button onclick="shiftDay(1)" class="btn btn-sm btn-light border" style="padding: 4px 10px;">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+    <button onclick="setHariIni()" class="btn btn-sm border" style="font-size: 0.82rem; padding: 4px 10px; background: #f1f3f9;">
+        Hari ini
+    </button>
+    <span id="labelHari" style="font-size: 0.82rem; color: #555; white-space: nowrap; margin-left: 4px;"></span>
+</div>
+@endsection
+
 @section('content')
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -101,7 +124,7 @@
                     <div class="col-4">
                         <div class="border rounded p-2">
                             <div class="font-weight-bold text-gray-800" style="font-size:1.4em;" id="statTotal">0</div>
-                            <div class="text-muted" style="font-size:0.75em;">Total Hari ini</div>
+                            <div class="text-muted" style="font-size:0.75em;">Total</div>
                         </div>
                     </div>
                     <div class="col-4">
@@ -127,30 +150,32 @@
                 </div>
 
                 {{-- Tombol Kontrol --}}
-                <div class="row mb-3">
-                    <div class="col-6 mb-2">
-                        <button onclick="panggilBerikutnya()"
-                                class="btn btn-outline-primary btn-block" style="border-radius:8px;">
-                            <i class="fas fa-step-forward mr-1"></i> Panggil Berikutnya
-                        </button>
-                    </div>
-                    <div class="col-6 mb-2">
-                        <button onclick="selesai()"
-                                class="btn btn-outline-success btn-block" style="border-radius:8px;">
-                            <i class="fas fa-check mr-1"></i> Selesai
-                        </button>
-                    </div>
-                    <div class="col-6 mb-2">
-                        <button onclick="panggilUlang()"
-                                class="btn btn-outline-secondary btn-block" style="border-radius:8px;">
-                            <i class="fas fa-redo mr-1"></i> Panggil Ulang
-                        </button>
-                    </div>
-                    <div class="col-6 mb-2">
-                        <button onclick="lewati()"
-                                class="btn btn-outline-warning btn-block" style="border-radius:8px;">
-                            <i class="fas fa-forward mr-1"></i> Lewati
-                        </button>
+                <div id="kontrolButtons">
+                    <div class="row mb-3">
+                        <div class="col-6 mb-2">
+                            <button onclick="panggilBerikutnya()"
+                                    class="btn btn-outline-primary btn-block" style="border-radius:8px;">
+                                <i class="fas fa-step-forward mr-1"></i> Panggil Berikutnya
+                            </button>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <button onclick="selesai()"
+                                    class="btn btn-outline-success btn-block" style="border-radius:8px;">
+                                <i class="fas fa-check mr-1"></i> Selesai
+                            </button>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <button onclick="panggilUlang()"
+                                    class="btn btn-outline-secondary btn-block" style="border-radius:8px;">
+                                <i class="fas fa-redo mr-1"></i> Panggil Ulang
+                            </button>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <button onclick="lewati()"
+                                    class="btn btn-outline-warning btn-block" style="border-radius:8px;">
+                                <i class="fas fa-forward mr-1"></i> Lewati
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -180,7 +205,36 @@
     let selectedNik  = null;
     let selectedNama = null;
 
-    // Ganti poli aktif
+    const hariNames  = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const bulanNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
+    function updateLabelHari(val) {
+        const d = new Date(val + 'T00:00:00');
+        document.getElementById('labelHari').textContent =
+            hariNames[d.getDay()] + ', ' + d.getDate() + ' ' + bulanNames[d.getMonth()] + ' ' + d.getFullYear();
+    }
+
+    function shiftDay(n) {
+        const inp = document.getElementById('filterTanggal');
+        const d = new Date(inp.value + 'T00:00:00');
+        d.setDate(d.getDate() + n);
+        inp.value = d.toISOString().slice(0, 10);
+        updateLabelHari(inp.value);
+        loadData();
+    }
+
+    function setHariIni() {
+        const today = new Date().toISOString().slice(0, 10);
+        document.getElementById('filterTanggal').value = today;
+        updateLabelHari(today);
+        loadData();
+    }
+
+    function gantiTanggal(val) {
+        updateLabelHari(val);
+        loadData();
+    }
+
     function gantiPoli(poli, el) {
         poliAktif = poli;
         document.querySelectorAll('#poliTab .nav-link').forEach(a => a.classList.remove('active'));
@@ -188,19 +242,21 @@
         loadData();
     }
 
-    // Load data antrian via AJAX
     function loadData() {
-        fetch(`/antrian/data?poli=${encodeURIComponent(poliAktif)}`, {
+        const tgl = document.getElementById('filterTanggal')?.value ?? '';
+        fetch(`/antrian/data?poli=${encodeURIComponent(poliAktif)}&tanggal=${tgl}`, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(r => r.json())
         .then(data => {
-            // Statistik
             document.getElementById('statTotal').textContent    = data.totalHariIni;
             document.getElementById('statMenunggu').textContent = data.menunggu;
             document.getElementById('statSelesai').textContent  = data.selesai;
 
-            // Sedang dipanggil
+            // Sembunyikan tombol kontrol kalau bukan hari ini
+            const kontrol = document.getElementById('kontrolButtons');
+            if (kontrol) kontrol.style.display = data.isToday ? 'block' : 'none';
+
             const box = document.getElementById('sedangDipanggil');
             if (data.sedangDipanggil) {
                 box.innerHTML = `
@@ -215,7 +271,6 @@
                 box.innerHTML = '<span class="text-muted small">Belum ada antrian aktif</span>';
             }
 
-            // Daftar antrian
             const list = document.getElementById('daftarAntrian');
             if (data.antrian.length === 0) {
                 list.innerHTML = `<div class="text-center text-muted py-4">
@@ -223,59 +278,52 @@
                     <p class="mb-0">Belum ada pasien dalam antrian</p>
                 </div>`;
             } else {
-                list.innerHTML = data.antrian.map((p, i) => `
-                    <div class="d-flex align-items-center p-2 mb-1 rounded ${p.status === 'dipanggil' ? 'bg-primary text-white' : 'bg-light'}"
-                         style="font-size:0.88em;">
-                        <span class="font-weight-bold mr-3">
-                            ${String(p.nomor_antrian).padStart(3,'0')}
-                        </span>
-                        <span class="flex-grow-1">${p.nama_pasien}</span>
-                        <span class="${p.status === 'dipanggil' ? 'text-white-50' : 'text-muted'}">
-                            ${p.status}
-                        </span>
-                    </div>
-                `).join('');
+                list.innerHTML = data.antrian.map(p => {
+                    let badgeClass = 'badge-warning';
+                    if (p.status === 'dipanggil') badgeClass = 'badge-primary';
+                    if (p.status === 'selesai')   badgeClass = 'badge-success';
+                    if (p.status === 'batal')     badgeClass = 'badge-danger';
+                    return `
+                        <div class="d-flex align-items-center p-2 mb-1 rounded ${p.status === 'dipanggil' ? 'bg-primary text-white' : 'bg-light'}"
+                             style="font-size:0.88em;">
+                            <span class="font-weight-bold mr-3">
+                                ${String(p.nomor_antrian).padStart(3,'0')}
+                            </span>
+                            <span class="flex-grow-1">${p.nama_pasien}</span>
+                            <span class="badge ${badgeClass}">${p.status}</span>
+                        </div>
+                    `;
+                }).join('');
             }
         });
     }
 
-    // Pilih pasien dari list
     function pilihPasien(nama, nik, el) {
         selectedNama = nama;
         selectedNik  = nik;
-
         document.querySelectorAll('.pasien-item').forEach(e => e.style.background = '');
         el.style.background = '#eef2ff';
-
         document.getElementById('selectedNama').textContent = nama + ' — ' + nik;
         document.getElementById('selectedInfo').classList.remove('d-none');
-
         const btn = document.getElementById('btnDaftarkan');
         btn.disabled = false;
         btn.classList.remove('btn-outline-secondary');
         btn.classList.add('btn-primary');
     }
 
-   // Filter pasien
-   function filterPasien() {
-    const val = document.getElementById('searchPasien').value.toLowerCase().trim();
-    document.querySelectorAll('.pasien-item').forEach(el => {
-        const nama = el.getAttribute('data-nama') || '';
-        const nik  = el.getAttribute('data-nik') || '';
-        if (nama.includes(val) || nik.includes(val)) {
-            el.classList.remove('pasien-hidden');
-        } else {
-            el.classList.add('pasien-hidden');
-        }
-    });
-}
+    function filterPasien() {
+        const val = document.getElementById('searchPasien').value.toLowerCase().trim();
+        document.querySelectorAll('.pasien-item').forEach(el => {
+            const nama = el.getAttribute('data-nama') || '';
+            const nik  = el.getAttribute('data-nik') || '';
+            el.classList.toggle('pasien-hidden', !nama.includes(val) && !nik.includes(val));
+        });
+    }
 
-    // Helper CSRF
     function getCsrf() {
         return document.querySelector('meta[name="csrf-token"]')?.content ?? '';
     }
 
-    // Helper alert
     function showAlert(msg, type = 'success') {
         document.getElementById('alertBox').innerHTML = `
             <div class="alert alert-${type} alert-dismissible fade show">
@@ -285,7 +333,6 @@
         setTimeout(() => document.getElementById('alertBox').innerHTML = '', 4000);
     }
 
-    // Helper POST
     function postJson(url, body) {
         return fetch(url, {
             method: 'POST',
@@ -298,50 +345,55 @@
         }).then(r => r.json());
     }
 
-    // Tambah ke antrian
     function tambahAntrian() {
         if (!selectedNik) return;
+        const tgl = document.getElementById('filterTanggal')?.value ?? '';
         postJson('/antrian/tambah', {
             poli: poliAktif,
             nama_pasien: selectedNama,
             nik_pasien: selectedNik,
-            keluhan: document.getElementById('inputKeluhan').value
+            keluhan: document.getElementById('inputKeluhan').value,
+            tanggal: tgl
         }).then(data => {
             showAlert(data.message);
             loadData();
         }).catch(() => showAlert('Gagal menambahkan pasien.', 'danger'));
     }
 
-    // Panggil berikutnya
     function panggilBerikutnya() {
-        postJson('/antrian/panggil-berikutnya', { poli: poliAktif })
+        const tgl = document.getElementById('filterTanggal')?.value ?? '';
+        postJson('/antrian/panggil-berikutnya', { poli: poliAktif, tanggal: tgl })
         .then(data => { showAlert(data.message); loadData(); })
         .catch(() => showAlert('Gagal memanggil antrian.', 'danger'));
     }
 
-    // Selesai
     function selesai() {
-        postJson('/antrian/selesai', { poli: poliAktif })
+        const tgl = document.getElementById('filterTanggal')?.value ?? '';
+        postJson('/antrian/selesai', { poli: poliAktif, tanggal: tgl })
         .then(data => { showAlert(data.message); loadData(); })
         .catch(() => showAlert('Gagal.', 'danger'));
     }
 
-    // Panggil ulang
     function panggilUlang() {
-        postJson('/antrian/panggil-ulang', { poli: poliAktif })
+        const tgl = document.getElementById('filterTanggal')?.value ?? '';
+        postJson('/antrian/panggil-ulang', { poli: poliAktif, tanggal: tgl })
         .then(data => { showAlert(data.message); loadData(); })
         .catch(() => showAlert('Gagal.', 'danger'));
     }
 
-    // Lewati
     function lewati() {
-        postJson('/antrian/lewati', { poli: poliAktif })
+        const tgl = document.getElementById('filterTanggal')?.value ?? '';
+        postJson('/antrian/lewati', { poli: poliAktif, tanggal: tgl })
         .then(data => { showAlert(data.message); loadData(); })
         .catch(() => showAlert('Gagal.', 'danger'));
     }
 
-    // Load pertama kali & auto-refresh tiap 10 detik
-   loadData();
+    document.addEventListener('DOMContentLoaded', function() {
+        const val = document.getElementById('filterTanggal')?.value;
+        if (val) updateLabelHari(val);
+    });
+
+    loadData();
     setInterval(loadData, 10000);
 </script>
 <style>
