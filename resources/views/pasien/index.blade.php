@@ -5,6 +5,8 @@
 @section('content')
 
 <h1 class="h3 mb-2 text-gray-800">Data Pasien</h1>
+<p class="text-muted">Halaman ini berisi seluruh data pasien Puskesmas</p>
+
 
 @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
