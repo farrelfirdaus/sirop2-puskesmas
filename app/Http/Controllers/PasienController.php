@@ -90,7 +90,12 @@ return view('pasien.index', compact('pasien'));
 
     public function destroy(string $id)
     {
+        // Hapus dari tabel pasien
         DB::table('pasien')->where('nik', $id)->delete();
+
+        // Hapus semua pendaftaran dengan NIK yang sama
+        DB::table('pendaftaran')->where('nik_pasien', $id)->delete();
+
         return redirect()->route('pasien.index')->with('success', 'Data pasien berhasil dihapus!');
     }
 }

@@ -17,7 +17,9 @@
 
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
                     <h1 class="h3 mb-0 text-gray-800">Riwayat Kunjungan</h1>
-                    <a href="{{ route('pendaftaran.create') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('pendaftaran.create') }}" 
+                        class="btn btn-primary btn-sm"
+                            style="width:auto; padding: 6px 14px; font-size:0.85rem">
                         <i class="fas fa-plus"></i> Daftar Antrian Baru
                     </a>
                 </div>
@@ -118,15 +120,19 @@
                                                     $detail = urlencode('No. Antrian: ' . $r->nomor_antrian . '\nKeluhan: ' . $r->keluhan);
                                                     $gcalUrl = "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$judul}&dates={$tglMulai}/{$tglSelesai}&details={$detail}";
                                                 @endphp
-                                                    <a href="{{ $gcalUrl }}" target="_blank" 
-                                                        class="btn btn-success btn-sm btn-block mb-1">
-                                                    <i class="fas fa-calendar-plus"></i> Google Calendar
-                                                    </a>
-                                                    <a href="{{ route('pendaftaran.cetak', $r->id) }}"
-                                                        target="_blank" 
-                                                        class="btn btn-secondary btn-sm btn-block">
-                                                    <i class="fas fa-print"></i> Cetak Antrian
-                                                     </a>
+                                                    <div style="display:flex; flex-direction:column; gap:4px">
+                                                        <a href="{{ $gcalUrl }}" target="_blank"
+                                                            class="btn btn-success btn-sm"
+                                                            style="padding: 4px 8px; font-size:0.75rem; white-space:nowrap; text-align:center">
+                                                            <i class="fas fa-calendar-plus"></i> Google Calendar
+                                                        </a>
+                                                        <a href="{{ route('pendaftaran.cetak', $r->id) }}"
+                                                            target="_blank"
+                                                            class="btn btn-secondary btn-sm"
+                                                            style="padding: 4px 8px; font-size:0.75rem; white-space:nowrap; text-align:center">
+                                                            <i class="fas fa-print"></i> Cetak Antrian
+                                                        </a>
+                                                    </div>
                                                 @endif
                                             </td>
                                         </tr>

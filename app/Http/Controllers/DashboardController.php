@@ -14,7 +14,9 @@ class DashboardController extends Controller
         $kunjunganHariIni  = Pendaftaran::whereDate('tanggal_kunjungan', $today)->count();
         $totalPasien       = User::where('role', 'pasien')->count();
         $totalKunjungan    = User::where('role', 'pasien')->whereDate('created_at', $today)->count();
-        $kunjunganBulanIni = Pendaftaran::where('status', 'menunggu')->count();
+        $kunjunganBulanIni = Pendaftaran::where('status', 'menunggu')
+                            ->whereDate('tanggal_kunjungan', $today)
+                            ->count();
 
         // Grafik 7 hari terakhir
         $grafik = [];
