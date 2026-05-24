@@ -1,66 +1,46 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Kunjungan — SIROP</title>
-    <link rel="stylesheet" href="{{ asset('css/sb-admin-2.min.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    @include('pasien.partials.head')
 </head>
 <body id="page-top">
 <div id="wrapper">
 
-    {{-- Sidebar --}}
-    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('pasien.dashboard') }}">
-            <div class="sidebar-brand-icon"><i class="fas fa-hospital"></i></div>
-            <div class="sidebar-brand-text mx-3">SIROP</div>
-        </a>
-        <hr class="sidebar-divider my-0">
-        <li class="nav-item"><a class="nav-link" href="{{ route('pasien.dashboard') }}"><i class="fas fa-fw fa-home"></i><span>Beranda</span></a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ route('pendaftaran.create') }}"><i class="fas fa-fw fa-plus-circle"></i><span>Daftar Antrian</span></a></li>
-        <li class="nav-item active"><a class="nav-link" href="{{ route('pendaftaran.riwayat') }}"><i class="fas fa-fw fa-history"></i><span>Riwayat Kunjungan</span></a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ route('profil.edit') }}"><i class="fas fa-fw fa-user"></i><span>Profil Saya</span></a></li>
-        <hr class="sidebar-divider">
-        <li class="nav-item">
-            <a class="nav-link" href="#" onclick="confirmLogout(event)">
-                <i class="fas fa-fw fa-sign-out-alt"></i><span>Logout</span>
-            </a>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
-        </li>
-    </ul>
+    @include('pasien.partials.sidebar')
 
     <div id="content-wrapper" class="d-flex flex-column">
         <div id="content">
-            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-                <span class="navbar-text ml-auto">Halo, <strong>{{ auth()->user()->name }}</strong>! 👋</span>
-            </nav>
+            @include('pasien.partials.navbar')
 
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800 ml-3">Riwayat Kunjungan</h1>
-    <a href="{{ route('pendaftaran.create') }}" class="btn btn-primary btn-sm">
-        <i class="fas fa-plus"></i> Daftar Antrian Baru
-    </a>
-</div>
+            <div class="container-fluid">
 
+                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                    <h1 class="h3 mb-0 text-gray-800">Riwayat Kunjungan</h1>
+                    <a href="{{ route('pendaftaran.create') }}" 
+                        class="btn btn-primary btn-sm"
+                            style="width:auto; padding: 6px 14px; font-size:0.85rem">
+                        <i class="fas fa-plus"></i> Daftar Antrian Baru
+                    </a>
+                </div>
 
                 @if(session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
 
                 <div class="card shadow mb-4">
-    <div class="card-body">
+                    <div class="card-body">
 
-        <div class="mb-3" style="max-width: 420px;">
-    <div style="display:flex; border: 1.5px solid #dee2e6; border-radius: 10px; overflow:hidden; background:white;">
-        <input type="text" id="searchInput" 
-            style="flex:1; border:none; outline:none; padding: 10px 16px; font-size:0.95rem; color:#6c757d; background:transparent;"
-            placeholder="Search for...">
-        <button style="background:#4e73df; border:none; padding: 10px 18px; cursor:pointer;">
-            <i class="fas fa-search" style="color:white; font-size:0.9rem"></i>
-        </button>
-    </div>
-</div>
+                        <div class="mb-3" style="max-width: 420px;">
+                            <div style="display:flex; border: 1.5px solid #dee2e6; border-radius: 10px; overflow:hidden; background:white;">
+                                <input type="text" id="searchInput"
+                                    style="flex:1; border:none; outline:none; padding: 10px 16px; font-size:0.95rem; color:#6c757d; background:transparent;"
+                                    placeholder="Search for...">
+                                <button style="background:#4e73df; border:none; padding: 10px 18px; cursor:pointer;">
+                                    <i class="fas fa-search" style="color:white; font-size:0.9rem"></i>
+                                </button>
+                            </div>
+                        </div>
 
                         @if($riwayat->isEmpty())
                             <div class="text-center py-5">
@@ -76,10 +56,9 @@
                                     <thead class="thead-light">
                                         <tr>
                                             <th>No</th>
-                                            <th>Tanggal Kunjungan</th>
+                                            <th>Tanggal</th>
                                             <th>Nama Pasien</th>
-                                         
-                                            <th>Spesialisasi</th>
+                                            <th>Poli</th>
                                             <th>No. Antrian</th>
                                             <th>Keluhan</th>
                                             <th>Untuk</th>
@@ -99,7 +78,7 @@
                                                     No. {{ $r->nomor_antrian }}
                                                 </span>
                                             </td>
-                                            <td>{{ Str::limit($r->keluhan, 50) }}</td>
+                                            <td>{{ Str::limit($r->keluhan, 30) }}</td>
                                             <td>
                                                 @if($r->untuk == 'diri_sendiri')
                                                     <span class="badge badge-info">Diri Sendiri</span>
@@ -117,43 +96,45 @@
                                                 @endif
                                             </td>
                                             <td>
-    @if($r->status == 'menunggu' && $r->tanggal_kunjungan > now()->toDateString())
-        <form action="{{ route('pendaftaran.batal', $r->id) }}" 
-            method="POST" class="d-inline"
-            onsubmit="return confirm('Yakin mau batalkan antrian ini?')">
-            @csrf
-            @method('PATCH')
-            <button type="submit" class="btn btn-danger btn-sm">
-                <i class="fas fa-times"></i> Batalkan
-            </button>
-        </form>
-    @elseif($r->status == 'menunggu' && $r->tanggal_kunjungan <= now()->toDateString())
-        <span class="text-muted small">Tidak bisa dibatalkan</span>
-    @else
-        <span class="text-muted small">-</span>
-    @endif
+                                                @if($r->status == 'menunggu' && $r->tanggal_kunjungan > now()->toDateString())
+                                                <form action="{{ route('pendaftaran.batal', $r->id) }}"
+                                                     method="POST"
+                                                        onsubmit="return confirm('Yakin mau batalkan antrian ini?')">
+                                                 @csrf
+                                                @method('PATCH')
+                                                    <button type="submit" class="btn btn-danger btn-sm btn-block mb-1">
+                                                    <i class="fas fa-times"></i> Batalkan
+                                                    </button>
+                                                </form>
+                                                @elseif($r->status == 'menunggu' && $r->tanggal_kunjungan <= now()->toDateString())
+                                                    <span class="text-muted small">Tidak bisa dibatalkan</span>
+                                                @else
+                                                    <span class="text-muted small">-</span>
+                                                @endif
 
-    {{-- Tombol Google Calendar --}}
-    @if($r->status != 'batal')
-        @php
-            $tglMulai = \Carbon\Carbon::parse($r->tanggal_kunjungan)->format('Ymd');
-            $tglSelesai = \Carbon\Carbon::parse($r->tanggal_kunjungan)->addDay()->format('Ymd');
-            $judul = urlencode('Kunjungan ' . $r->poli . ' - SIROP Puskesmas');
-            $detail = urlencode('No. Antrian: ' . $r->nomor_antrian . '\nKeluhan: ' . $r->keluhan);
-            $gcalUrl = "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$judul}&dates={$tglMulai}/{$tglSelesai}&details={$detail}";
-        @endphp
-        <a href="{{ $gcalUrl }}" target="_blank" class="btn btn-success btn-sm mt-1">
-            <i class="fas fa-calendar-plus"></i> Google Calendar
-        </a>
-    @endif
-    {{-- Tombol Cetak PDF --}}
-@if($r->status != 'batal')
-    <a href="{{ route('pendaftaran.cetak', $r->id) }}" 
-        target="_blank" class="btn btn-primary btn-sm mt-1">
-        <i class="fas fa-print"></i> Cetak
-    </a>
-@endif
-</td>
+                                                @if($r->status != 'batal')
+                                                @php
+                                                    $tglMulai = \Carbon\Carbon::parse($r->tanggal_kunjungan)->format('Ymd');
+                                                    $tglSelesai = \Carbon\Carbon::parse($r->tanggal_kunjungan)->addDay()->format('Ymd');
+                                                    $judul = urlencode('Kunjungan ' . $r->poli . ' - SIROP Puskesmas');
+                                                    $detail = urlencode('No. Antrian: ' . $r->nomor_antrian . '\nKeluhan: ' . $r->keluhan);
+                                                    $gcalUrl = "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$judul}&dates={$tglMulai}/{$tglSelesai}&details={$detail}";
+                                                @endphp
+                                                    <div style="display:flex; flex-direction:column; gap:4px">
+                                                        <a href="{{ $gcalUrl }}" target="_blank"
+                                                            class="btn btn-success btn-sm"
+                                                            style="padding: 4px 8px; font-size:0.75rem; white-space:nowrap; text-align:center">
+                                                            <i class="fas fa-calendar-plus"></i> Google Calendar
+                                                        </a>
+                                                        <a href="{{ route('pendaftaran.cetak', $r->id) }}"
+                                                            target="_blank"
+                                                            class="btn btn-secondary btn-sm"
+                                                            style="padding: 4px 8px; font-size:0.75rem; white-space:nowrap; text-align:center">
+                                                            <i class="fas fa-print"></i> Cetak Antrian
+                                                        </a>
+                                                    </div>
+                                                @endif
+                                            </td>
                                         </tr>
                                         @endforeach
                                     </tbody>
@@ -162,24 +143,25 @@
                         @endif
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
+
+<script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Search filter
     document.getElementById('searchInput').addEventListener('keyup', function() {
         const keyword = this.value.toLowerCase();
         const rows = document.querySelectorAll('tbody tr');
         rows.forEach(row => {
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(keyword) ? '' : 'none';
+            row.style.display = row.innerText.toLowerCase().includes(keyword) ? '' : 'none';
         });
     });
 
-    // Logout konfirmasi
     function confirmLogout(event) {
         event.preventDefault();
         Swal.fire({
@@ -198,6 +180,5 @@
         });
     }
 </script>
-</body>
 </body>
 </html>

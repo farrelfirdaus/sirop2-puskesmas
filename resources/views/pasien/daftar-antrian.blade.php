@@ -1,41 +1,17 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Antrian — SIROP</title>
-    <link rel="stylesheet" href="{{ asset('css/sb-admin-2.min.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>Beranda Pasien — SIROP</title>
+    @include('pasien.partials.head')
 </head>
 <body id="page-top">
 <div id="wrapper">
 
-    {{-- Sidebar --}}
-    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('pasien.dashboard') }}">
-            <div class="sidebar-brand-icon"><i class="fas fa-hospital"></i></div>
-            <div class="sidebar-brand-text mx-3">SIROP</div>
-        </a>
-        <hr class="sidebar-divider my-0">
-        <li class="nav-item"><a class="nav-link" href="{{ route('pasien.dashboard') }}"><i class="fas fa-fw fa-home"></i><span>Beranda</span></a></li>
-        <li class="nav-item active"><a class="nav-link" href="{{ route('pendaftaran.create') }}"><i class="fas fa-fw fa-plus-circle"></i><span>Daftar Antrian</span></a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ route('pendaftaran.riwayat') }}"><i class="fas fa-fw fa-history"></i><span>Riwayat Kunjungan</span></a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ route('profil.edit') }}"><i class="fas fa-fw fa-user"></i><span>Profil Saya</span></a></li>
-        <hr class="sidebar-divider">
-        <li class="nav-item">
-            <a class="nav-link" href="#" onclick="confirmLogout(event)">
-                <i class="fas fa-fw fa-sign-out-alt"></i><span>Logout</span>
-            </a>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
-        </li>
-    </ul>
+    @include('pasien.partials.sidebar')
 
     <div id="content-wrapper" class="d-flex flex-column">
         <div id="content">
-            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-                <span class="navbar-text ml-auto">Halo, <strong>{{ auth()->user()->name }}</strong>! 👋</span>
-            </nav>
-
+            @include('pasien.partials.navbar')
             <div class="container-fluid">
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
                     <h1 class="h3 mb-0 text-gray-800">Daftar Antrian</h1>
@@ -181,14 +157,15 @@
                                 </div>
                             </div>
 
-                            {{-- Pilih Poli & Jadwal --}}
+                            
+{{-- Pilih Poli & Jadwal --}}
 <div class="card mb-4">
     <div class="card-header bg-light">
         <h6 class="m-0 font-weight-bold text-secondary">Pilih Poli & Jadwal</h6>
     </div>
     <div class="card-body">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="form-group">
                     <label>Pilih Poli</label>
                     <select name="poli" class="form-control" required>
@@ -199,22 +176,70 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Tanggal Kunjungan</label>
-                                                <input type="date" name="tanggal_kunjungan" class="form-control"
-                                                    value="{{ old('tanggal_kunjungan') }}"
-                                                    min="{{ date('Y-m-d') }}" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Keluhan</label>
-                                        <textarea name="keluhan" class="form-control" rows="3"
-                                            placeholder="Deskripsikan keluhan kamu" required>{{ old('keluhan') }}</textarea>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Tanggal Kunjungan</label>
+                    <input type="date" name="tanggal_kunjungan" class="form-control"
+                        value="{{ old('tanggal_kunjungan') }}"
+                        min="{{ date('Y-m-d') }}" required>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Jenis Pembayaran</label>
+                    <select name="jenis_pembayaran" class="form-control" required
+                            onchange="toggleAsuransi(this.value)">
+                        <option value="">-- Pilih --</option>
+                        <option value="umum" {{ old('jenis_pembayaran') == 'umum' ? 'selected' : '' }}>Umum</option>
+                        <option value="bpjs" {{ old('jenis_pembayaran') == 'bpjs' ? 'selected' : '' }}>BPJS Kesehatan</option>
+                        <option value="asuransi" {{ old('jenis_pembayaran') == 'asuransi' ? 'selected' : '' }}>Asuransi</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+       {{-- Nama Asuransi, muncul kalau pilih Asuransi --}}
+<div class="row" id="row-asuransi" style="display: {{ old('jenis_pembayaran') == 'asuransi' ? 'flex' : 'none' }};">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label>Nama Asuransi</label>
+
+            {{-- Dropdown --}}
+            <select class="form-control" id="input-asuransi"
+                    onchange="toggleInputAsuransi(this.value)"
+                    name="nama_asuransi">
+                <option value="">-- Pilih Asuransi --</option>
+                <option value="Allianz" {{ old('nama_asuransi') == 'Allianz' ? 'selected' : '' }}>Allianz</option>
+                <option value="AXA Mandiri" {{ old('nama_asuransi') == 'AXA Mandiri' ? 'selected' : '' }}>AXA Mandiri</option>
+                <option value="Prudential" {{ old('nama_asuransi') == 'Prudential' ? 'selected' : '' }}>Prudential</option>
+                <option value="Manulife" {{ old('nama_asuransi') == 'Manulife' ? 'selected' : '' }}>Manulife</option>
+                <option value="Cigna" {{ old('nama_asuransi') == 'Cigna' ? 'selected' : '' }}>Cigna</option>
+                <option value="Lainnya">Lainnya</option>
+            </select>
+
+            {{-- Input text, muncul menggantikan dropdown kalau pilih Lainnya --}}
+            <input type="text" class="form-control" id="input-asuransi-lainnya"
+                   name="nama_asuransi"
+                   placeholder="Tulis nama asuransi kamu"
+                   value="{{ old('nama_asuransi') }}"
+                   style="display: none;">
+
+            {{-- Tombol kembali ke dropdown --}}
+            <small id="link-kembali-asuransi" style="display:none;">
+                <a href="#" onclick="kembaliKeDropdown(); return false;">
+                    ← Pilih dari daftar
+                </a>
+            </small>
+        </div>
+    </div>
+</div>
+        <div class="form-group">
+            <label>Keluhan</label>
+            <textarea name="keluhan" class="form-control" rows="3"
+                placeholder="Deskripsikan keluhan kamu" required>{{ old('keluhan') }}</textarea>
+        </div>
+    </div>
+</div>
 
                             <button type="submit" class="btn btn-primary btn-block">
                                 <i class="fas fa-check"></i> Daftar Antrian
@@ -261,7 +286,7 @@
             setSelect('input_pendidikan', profilUser.pendidikan_terakhir);
             setSelect('input_golongan_darah', profilUser.golongan_darah);
 
-            document.getElementById('label-data-pasien').innerText = 'Data Pasien (Data Kamu)';
+            document.getElementById('label-data-pasien').innerText = 'Data Pasien';
         } else {
             // Kosongkan semua field
             document.getElementById('input_nama').value = '';
@@ -322,6 +347,39 @@
             }
         });
     }
+    function toggleAsuransi(val) {
+    const row = document.getElementById('row-asuransi');
+    const input = document.getElementById('input-asuransi');
+    if (val === 'asuransi') {
+        row.style.display = 'flex';
+        input.setAttribute('required', 'required');
+    } else {
+        row.style.display = 'none';
+        input.removeAttribute('required');
+    }
+}
+function toggleInputAsuransi(val) {
+    if (val === 'Lainnya') {
+        document.getElementById('input-asuransi').style.display = 'none';
+        document.getElementById('input-asuransi').removeAttribute('name');
+        document.getElementById('input-asuransi-lainnya').style.display = 'block';
+        document.getElementById('input-asuransi-lainnya').setAttribute('name', 'nama_asuransi');
+        document.getElementById('input-asuransi-lainnya').setAttribute('required', 'required');
+        document.getElementById('input-asuransi-lainnya').focus();
+        document.getElementById('link-kembali-asuransi').style.display = 'block';
+    }
+}
+
+function kembaliKeDropdown() {
+    document.getElementById('input-asuransi').style.display = 'block';
+    document.getElementById('input-asuransi').setAttribute('name', 'nama_asuransi');
+    document.getElementById('input-asuransi').value = '';
+    document.getElementById('input-asuransi-lainnya').style.display = 'none';
+    document.getElementById('input-asuransi-lainnya').removeAttribute('name');
+    document.getElementById('input-asuransi-lainnya').removeAttribute('required');
+    document.getElementById('input-asuransi-lainnya').value = '';
+    document.getElementById('link-kembali-asuransi').style.display = 'none';
+}
 </script>
 </body>
 </body>

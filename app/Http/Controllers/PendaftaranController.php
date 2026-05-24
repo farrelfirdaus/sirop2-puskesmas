@@ -34,6 +34,8 @@ class PendaftaranController extends Controller
             'pekerjaan'           => 'required|string',
             'golongan_darah'      => 'required|string',
             'poli'                => 'required|string|in:Poli Umum,Poli Gigi,Poli KIA',
+            'jenis_pembayaran'    => 'required|in:umum,bpjs,asuransi',
+            'nama_asuransi'       => 'nullable|string',
         ]);
 
         // Hitung nomor antrian per poli
@@ -69,6 +71,8 @@ $nomorAntrian = $jumlahAntrian + 1;
             'untuk'               => $request->untuk,
             'status'              => 'menunggu',
             'poli'                => $request->poli,
+            'jenis_pembayaran'    => $request->jenis_pembayaran,
+            'nama_asuransi'       => $request->nama_asuransi,
         ]);
 
         return redirect()->route('pendaftaran.riwayat')
