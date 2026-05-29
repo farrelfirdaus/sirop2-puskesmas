@@ -36,20 +36,21 @@
                     value="{{ old('email') }}" required />
                 <i class="fa-solid fa-envelope"></i>
             </div>
-            <div class="input-box">
-                <input type="password" name="password" placeholder="Password" required />
+
+            {{-- PASSWORD LOGIN + TOGGLE MATA --}}
+            <div class="input-box" style="position:relative;">
+                <input type="password" name="password" id="passwordLogin" placeholder="Password" required />
                 <i class="fa-solid fa-lock"></i>
+                <span onclick="togglePassword('passwordLogin', this)"
+                      style="position:absolute; right:40px; top:50%; transform:translateY(-50%); cursor:pointer;">
+                    <i class="fa-solid fa-eye-slash"></i>
+                </span>
             </div>
+
             <div class="forget-link">
                 <a href="#">Lupa Password?</a>
             </div>
             <button type="submit" class="btn">Login</button>
-            <p>Atau Login Dengan</p>
-            <div class="social-icon">
-                <a href="#"><i class="fa-brands fa-google"></i></a>
-                <a href="#"><i class="fa-brands fa-facebook"></i></a>
-                <a href="#"><i class="fa-brands fa-apple"></i></a>
-            </div>
         </form>
     </div>
 
@@ -68,21 +69,28 @@
                     value="{{ old('email') }}" required />
                 <i class="fa-solid fa-envelope"></i>
             </div>
-            <div class="input-box">
-                <input type="password" name="password" placeholder="Password" required />
+
+            {{-- PASSWORD REGISTER + TOGGLE MATA --}}
+            <div class="input-box" style="position:relative;">
+                <input type="password" name="password" id="passwordRegister" placeholder="Password" required />
                 <i class="fa-solid fa-lock"></i>
+                <span onclick="togglePassword('passwordRegister', this)"
+                      style="position:absolute; right:40px; top:50%; transform:translateY(-50%); cursor:pointer;">
+                    <i class="fa-solid fa-eye-slash"></i>
+                </span>
             </div>
-            <div class="input-box">
-                <input type="password" name="password_confirmation" placeholder="Konfirmasi Password" required />
+
+            {{-- KONFIRMASI PASSWORD + TOGGLE MATA --}}
+            <div class="input-box" style="position:relative;">
+                <input type="password" name="password_confirmation" id="passwordConfirm" placeholder="Konfirmasi Password" required />
                 <i class="fa-solid fa-lock"></i>
+                <span onclick="togglePassword('passwordConfirm', this)"
+                      style="position:absolute; right:40px; top:50%; transform:translateY(-50%); cursor:pointer;">
+                    <i class="fa-solid fa-eye-slash"></i>
+                </span>
             </div>
+
             <button type="submit" class="btn">Register</button>
-            <p>Atau Register Dengan</p>
-            <div class="social-icon">
-                <a href="#"><i class="fa-brands fa-google"></i></a>
-                <a href="#"><i class="fa-brands fa-facebook"></i></a>
-                <a href="#"><i class="fa-brands fa-apple"></i></a>
-            </div>
         </form>
     </div>
 
@@ -124,6 +132,20 @@
             container.classList.add("active");
         @endif
     });
+
+    function togglePassword(inputId, icon) {
+        const input = document.getElementById(inputId);
+        const i = icon.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            i.classList.remove('fa-eye-slash');
+            i.classList.add('fa-eye');
+        } else {
+            input.type = 'password';
+            i.classList.remove('fa-eye');
+            i.classList.add('fa-eye-slash');
+        }
+    }
 </script>
 
 </body>
