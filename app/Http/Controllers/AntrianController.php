@@ -145,6 +145,26 @@ class AntrianController extends Controller
 
         $berikutnya->update(['status' => 'dipanggil']);
 
+        // Kirim notifikasi ke pasien yang dipanggil
+        if ($berikutnya->user_id) {
+            // Hindari duplikasi notifikasi dipanggil untuk antrian yang sama
+            $sudahAda = \App\Models\Notifikasi::where('user_id', $berikutnya->user_id)
+                ->where('pendaftaran_id', $berikutnya->id)
+                ->where('tipe', 'dipanggil')
+                ->exists();
+
+            if (!$sudahAda) {
+                \App\Models\Notifikasi::create([
+                    'user_id'        => $berikutnya->user_id,
+                    'judul'          => 'Nomor Antrian Kamu Dipanggil!',
+                    'pesan'          => 'Nomor antrian ' . str_pad($berikutnya->nomor_antrian, 3, '0', STR_PAD_LEFT) .
+                                       ' di ' . $berikutnya->poli . ' sedang dipanggil. Segera menuju ruang pemeriksaan.',
+                    'tipe'           => 'dipanggil',
+                    'pendaftaran_id' => $berikutnya->id,
+                ]);
+            }
+        }
+
         return response()->json(['message' => 'Berhasil memanggil antrian.', 'data' => $berikutnya]);
     }
 

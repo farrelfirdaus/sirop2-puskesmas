@@ -92,33 +92,30 @@ Route::middleware(['auth', 'pasien'])->group(function () {
     // Antrian Realtime
     Route::get('/api/antrian-realtime', function() {
     $today = now()->toDateString();
-    
+
+    $buatDataPoli = function($poli) use ($today) {
+        $dipanggil = \App\Models\Pendaftaran::where('poli', $poli)
+                        ->where('tanggal_kunjungan', $today)
+                        ->where('status', 'dipanggil')
+                        ->first();
+
+        return [
+            'nomor_dipanggil' => $dipanggil ? $dipanggil->nomor_antrian : null,
+            'nama_dipanggil'  => $dipanggil ? $dipanggil->nama_pasien : null,
+            'sudah_dilayani'  => \App\Models\Pendaftaran::where('poli', $poli)
+                                    ->where('tanggal_kunjungan', $today)
+                                    ->where('status', 'selesai')->count(),
+            'menunggu'        => \App\Models\Pendaftaran::where('poli', $poli)
+                                    ->where('tanggal_kunjungan', $today)
+                                    ->where('status', 'menunggu')->count(),
+        ];
+    };
+
     return response()->json([
-        'Poli Umum' => [
-            'sedang'   => \App\Models\Pendaftaran::where('poli', 'Poli Umum')
-                            ->where('tanggal_kunjungan', $today)
-                            ->where('status', 'selesai')->count(),
-            'menunggu' => \App\Models\Pendaftaran::where('poli', 'Poli Umum')
-                            ->where('tanggal_kunjungan', $today)
-                            ->where('status', 'menunggu')->count(),
-        ],
-        'Poli Gigi' => [
-            'sedang'   => \App\Models\Pendaftaran::where('poli', 'Poli Gigi')
-                            ->where('tanggal_kunjungan', $today)
-                            ->where('status', 'selesai')->count(),
-            'menunggu' => \App\Models\Pendaftaran::where('poli', 'Poli Gigi')
-                            ->where('tanggal_kunjungan', $today)
-                            ->where('status', 'menunggu')->count(),
-        ],
-        'Poli KIA' => [
-            'sedang'   => \App\Models\Pendaftaran::where('poli', 'Poli KIA')
-                            ->where('tanggal_kunjungan', $today)
-                            ->where('status', 'selesai')->count(),
-            'menunggu' => \App\Models\Pendaftaran::where('poli', 'Poli KIA')
-                            ->where('tanggal_kunjungan', $today)
-                            ->where('status', 'menunggu')->count(),
-        ],
-        ]);
+        'Poli Umum' => $buatDataPoli('Poli Umum'),
+        'Poli Gigi' => $buatDataPoli('Poli Gigi'),
+        'Poli KIA'  => $buatDataPoli('Poli KIA'),
+    ]);
     })->name('antrian.realtime');
 // Batalkan antrian
     Route::patch('/pendaftaran/{id}/batal', [PendaftaranController::class, 'batalkan'])

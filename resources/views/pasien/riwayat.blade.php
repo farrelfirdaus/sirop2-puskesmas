@@ -88,15 +88,17 @@
                                             </td>
                                             <td>
                                                 @if($r->status == 'menunggu')
-                                                    <span class="badge badge-warning">Menunggu</span>
+                                                    <span class="badge badge-warning">Menunggu Dipanggil</span>
+                                                @elseif($r->status == 'dipanggil')
+                                                    <span class="badge badge-primary">Sedang Dipanggil</span>
                                                 @elseif($r->status == 'selesai')
                                                     <span class="badge badge-success">Selesai</span>
                                                 @else
-                                                    <span class="badge badge-danger">Dibatalkan</span>
+                                                    <span class="badge badge-danger">Batal</span>
                                                 @endif
                                             </td>
                                             <td>
-                                                @if($r->status == 'menunggu' && $r->tanggal_kunjungan > now()->toDateString())
+                                                @if(in_array($r->status, ['menunggu']) && $r->tanggal_kunjungan > now()->toDateString())
                                                 <form action="{{ route('pendaftaran.batal', $r->id) }}"
                                                      method="POST"
                                                         onsubmit="return confirm('Yakin mau batalkan antrian ini?')">
@@ -106,7 +108,7 @@
                                                     <i class="fas fa-times"></i> Batalkan
                                                     </button>
                                                 </form>
-                                                @elseif($r->status == 'menunggu' && $r->tanggal_kunjungan <= now()->toDateString())
+                                                @elseif(in_array($r->status, ['menunggu', 'dipanggil']) && $r->tanggal_kunjungan <= now()->toDateString())
                                                     <span class="text-muted small">Tidak bisa dibatalkan</span>
                                                 @else
                                                     <span class="text-muted small">-</span>

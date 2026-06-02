@@ -106,22 +106,23 @@
 
             {{-- Konten Antrian --}}
             <div class="text-center">
-                <h1 class="display-4 font-weight-bold text-primary">
-                    No. <span id="angka-antrian">{{ $antrianPerPoli['Poli Umum']['sedang'] ?: '-' }}</span>
-                </h1>
-                <p class="text-muted" id="label-poli">Poli Umum — {{ now()->format('d M Y') }}</p>
+                {{-- Nomor yang sedang dipanggil --}}
+                <div id="box-dipanggil">
+                    <p class="text-muted mb-1" style="font-size:0.78rem;">SEDANG DIPANGGIL</p>
+                    <h1 class="display-4 font-weight-bold text-primary mb-0">
+                        <span id="angka-antrian">-</span>
+                    </h1>
+                    <p class="text-muted mb-0" id="nama-dipanggil" style="font-size:0.85rem;"></p>
+                </div>
+                <p class="text-muted mt-1" id="label-poli">Poli Umum — {{ now()->format('d M Y') }}</p>
                 <hr>
                 <div style="display:flex; justify-content:space-around; padding:0 20px">
                     <div>
-                        <h4 class="text-success font-weight-bold" id="sudah-dilayani">
-                            {{ $antrianPerPoli['Poli Umum']['sedang'] }}
-                        </h4>
+                        <h4 class="text-success font-weight-bold" id="sudah-dilayani">-</h4>
                         <small>Sudah Dilayani</small>
                     </div>
                     <div>
-                        <h4 class="text-danger font-weight-bold" id="menunggu-count">
-                            {{ $antrianPerPoli['Poli Umum']['menunggu'] }}
-                        </h4>
+                        <h4 class="text-danger font-weight-bold" id="menunggu-count">-</h4>
                         <small>Menunggu</small>
                     </div>
                 </div>
@@ -158,7 +159,9 @@
                                     <td>{{ $r->nomor_antrian }}</td>
                                     <td>
                                         @if($r->status == 'menunggu')
-                                            <span class="badge badge-warning">Menunggu</span>
+                                            <span class="badge badge-warning">Menunggu Dipanggil</span>
+                                        @elseif($r->status == 'dipanggil')
+                                            <span class="badge badge-primary">Sedang Dipanggil</span>
                                         @elseif($r->status == 'selesai')
                                             <span class="badge badge-success">Selesai</span>
                                         @else
@@ -186,24 +189,54 @@
 <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// Polling badge notifikasi — jalan setelah jQuery load
+function cekBadgeNotifikasi() {
+    if (!window._notifUrlJumlah) return;
+    fetch(window._notifUrlJumlah, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        const badge = document.getElementById('notif-badge');
+        if (!badge) return;
+        if (data.jumlah > 0) {
+            badge.style.display = 'block';
+            badge.textContent = data.jumlah > 9 ? '9+' : data.jumlah;
+        } else {
+            badge.style.display = 'none';
+        }
+    })
+    .catch(() => {});
+}
+cekBadgeNotifikasi();
+setInterval(cekBadgeNotifikasi, 5000);
+</script>
 <script>
 let poliAktif = 'Poli Umum';
 
-let antrianData = {
-    'Poli Umum': {
-        sedang: {{ $antrianPerPoli['Poli Umum']['sedang'] }},
-        menunggu: {{ $antrianPerPoli['Poli Umum']['menunggu'] }}
-    },
-    'Poli Gigi': {
-        sedang: {{ $antrianPerPoli['Poli Gigi']['sedang'] }},
-        menunggu: {{ $antrianPerPoli['Poli Gigi']['menunggu'] }}
-    },
-    'Poli KIA': {
-        sedang: {{ $antrianPerPoli['Poli KIA']['sedang'] }},
-        menunggu: {{ $antrianPerPoli['Poli KIA']['menunggu'] }}
+function updateTampilanAntrian(data) {
+    const d = data[poliAktif];
+    const nomorEl = document.getElementById('angka-antrian');
+    const namaEl  = document.getElementById('nama-dipanggil');
+
+    if (d.nomor_dipanggil) {
+        nomorEl.innerText = String(d.nomor_dipanggil).padStart(3, '0');
+        namaEl.innerText  = d.nama_dipanggil ?? '';
+        nomorEl.closest('h1').classList.remove('text-muted');
+        nomorEl.closest('h1').classList.add('text-primary');
+    } else {
+        nomorEl.innerText = '-';
+        namaEl.innerText  = 'Belum ada antrian dipanggil';
+        nomorEl.closest('h1').classList.remove('text-primary');
+        nomorEl.closest('h1').classList.add('text-muted');
     }
-};
+
+    document.getElementById('sudah-dilayani').innerText = d.sudah_dilayani ?? 0;
+    document.getElementById('menunggu-count').innerText = d.menunggu ?? 0;
+}
 
 function gantiTab(poli, btn) {
     poliAktif = poli;
@@ -214,27 +247,128 @@ function gantiTab(poli, btn) {
     btn.style.background = '#4e73df';
     btn.style.color = 'white';
 
-    const data = antrianData[poli];
-    document.getElementById('angka-antrian').innerText = data.sedang > 0 ? data.sedang : '-';
     document.getElementById('label-poli').innerText = poli + ' — {{ now()->format("d M Y") }}';
-    document.getElementById('sudah-dilayani').innerText = data.sedang;
-    document.getElementById('menunggu-count').innerText = data.menunggu;
+
+    // Langsung fetch saat ganti tab
+    refreshAntrianRealtime();
 }
 
-// Realtime: update setiap 10 detik
+// Realtime: update setiap 5 detik
 function refreshAntrianRealtime() {
     fetch('/api/antrian-realtime')
         .then(r => r.json())
         .then(data => {
-            antrianData = data;
-            const d = data[poliAktif];
-            document.getElementById('angka-antrian').innerText = d.sedang > 0 ? d.sedang : '-';
-            document.getElementById('sudah-dilayani').innerText = d.sedang;
-            document.getElementById('menunggu-count').innerText = d.menunggu;
-        });
+            updateTampilanAntrian(data);
+        })
+        .catch(() => {}); // silent fail
 }
 
-setInterval(refreshAntrianRealtime, 10000); // setiap 10 detik
+// ============================================================
+// POP-UP TOAST saat notifikasi 'dipanggil' masuk
+// ============================================================
+let sudahMunculNotifIds = JSON.parse(sessionStorage.getItem('notifMuncul') || '[]');
+
+function cekNotifikasiDipanggil() {
+    fetch('{{ route("notifikasi.index") }}', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(list => {
+        if (!list || list.length === 0) return;
+
+        // Cari notifikasi tipe 'dipanggil' yang belum dibaca dan belum pernah pop-up
+        const baru = list.filter(n =>
+            n.tipe === 'dipanggil' &&
+            !n.dibaca &&
+            !sudahMunculNotifIds.includes(n.id)
+        );
+
+        baru.forEach(n => {
+            tampilToast(n.judul, n.pesan);
+            sudahMunculNotifIds.push(n.id);
+        });
+
+        // Simpan ke sessionStorage supaya tidak muncul lagi setelah refresh
+        sessionStorage.setItem('notifMuncul', JSON.stringify(sudahMunculNotifIds));
+    })
+    .catch(() => {});
+}
+
+function tampilToast(judul, pesan) {
+    // Buat container toast kalau belum ada
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = `
+            position: fixed; bottom: 24px; right: 24px;
+            z-index: 9999; display: flex; flex-direction: column; gap: 10px;
+        `;
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        background: white; border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+        padding: 0; overflow: hidden; min-width: 300px; max-width: 360px;
+        animation: slideInToast 0.4s ease;
+        border-left: 5px solid #4e73df;
+    `;
+    toast.innerHTML = `
+        <div style="background:#4e73df; padding:10px 16px; display:flex; align-items:center; gap:10px;">
+            <i class="fas fa-bullhorn" style="color:white; font-size:1rem;"></i>
+            <span style="color:white; font-weight:700; font-size:0.9rem; flex:1;">${judul}</span>
+            <span onclick="this.closest('[data-toast]').remove()"
+                  style="color:rgba(255,255,255,0.7); cursor:pointer; font-size:1.1rem; line-height:1;">&times;</span>
+        </div>
+        <div style="padding:12px 16px;">
+            <p style="margin:0; font-size:0.85rem; color:#444; line-height:1.5;">${pesan}</p>
+            <div style="margin-top:10px; display:flex; gap:8px;">
+                <button onclick="this.closest('[data-toast]').remove()"
+                        style="flex:1; padding:6px; border:1.5px solid #4e73df; border-radius:8px;
+                               background:white; color:#4e73df; font-size:0.8rem; cursor:pointer; font-weight:600;">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    `;
+    toast.setAttribute('data-toast', '1');
+    container.appendChild(toast);
+
+    // Auto close setelah 10 detik
+    setTimeout(() => {
+        toast.style.animation = 'fadeOutToast 0.4s ease forwards';
+        setTimeout(() => toast.remove(), 400);
+    }, 10000);
+}
+
+// CSS animasi toast
+if (!document.getElementById('toast-style')) {
+    const style = document.createElement('style');
+    style.id = 'toast-style';
+    style.textContent = `
+        @keyframes slideInToast {
+            from { opacity:0; transform: translateX(60px); }
+            to   { opacity:1; transform: translateX(0); }
+        }
+        @keyframes fadeOutToast {
+            from { opacity:1; transform: translateX(0); }
+            to   { opacity:0; transform: translateX(60px); }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Load pertama kali saat halaman dibuka
+refreshAntrianRealtime();
+cekNotifikasiDipanggil();
+
+// Polling gabungan setiap 5 detik
+setInterval(() => {
+    refreshAntrianRealtime();
+    cekNotifikasiDipanggil();
+}, 5000);
 </script>
 <script>
     function confirmLogout(event) {
