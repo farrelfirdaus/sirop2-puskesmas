@@ -157,91 +157,94 @@
                                 </div>
                             </div>
 
-                            
-{{-- Pilih Poli & Jadwal --}}
-<div class="card mb-4">
-    <div class="card-header bg-light">
-        <h6 class="m-0 font-weight-bold text-secondary">Pilih Poli & Jadwal</h6>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label>Pilih Poli</label>
-                    <select name="poli" class="form-control" required>
-                        <option value="">-- Pilih Poli --</option>
-                        <option value="Poli Umum" {{ old('poli') == 'Poli Umum' ? 'selected' : '' }}>Poli Umum</option>
-                        <option value="Poli Gigi" {{ old('poli') == 'Poli Gigi' ? 'selected' : '' }}>Poli Gigi</option>
-                        <option value="Poli KIA" {{ old('poli') == 'Poli KIA' ? 'selected' : '' }}>Poli KIA</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label>Tanggal Kunjungan</label>
-                    <input type="date" name="tanggal_kunjungan" class="form-control"
-                        value="{{ old('tanggal_kunjungan') }}"
-                        min="{{ date('Y-m-d') }}" required>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label>Jenis Pembayaran</label>
-                    <select name="jenis_pembayaran" class="form-control" required
-                            onchange="toggleAsuransi(this.value)">
-                        <option value="">-- Pilih --</option>
-                        <option value="umum" {{ old('jenis_pembayaran') == 'umum' ? 'selected' : '' }}>Umum</option>
-                        <option value="bpjs" {{ old('jenis_pembayaran') == 'bpjs' ? 'selected' : '' }}>BPJS Kesehatan</option>
-                        <option value="asuransi" {{ old('jenis_pembayaran') == 'asuransi' ? 'selected' : '' }}>Asuransi</option>
-                    </select>
-                </div>
-            </div>
-        </div>
+                            {{-- Pilih Poli & Jadwal --}}
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h6 class="m-0 font-weight-bold text-secondary">Pilih Poli & Jadwal</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Pilih Poli</label>
+                                                <select name="poli" class="form-control" required>
+                                                    <option value="">-- Pilih Poli --</option>
+                                                    <option value="Poli Umum" {{ old('poli') == 'Poli Umum' ? 'selected' : '' }}>Poli Umum</option>
+                                                    <option value="Poli Gigi" {{ old('poli') == 'Poli Gigi' ? 'selected' : '' }}>Poli Gigi</option>
+                                                    <option value="Poli KIA" {{ old('poli') == 'Poli KIA' ? 'selected' : '' }}>Poli KIA</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Tanggal Kunjungan</label>
+                                                <input type="date" name="tanggal_kunjungan" class="form-control"
+                                                    id="input_tanggal_kunjungan"
+                                                    value="{{ old('tanggal_kunjungan') }}"
+                                                    min="{{ date('Y-m-d') }}"
+                                                    max="{{ date('Y-m-d', strtotime('+3 days')) }}" required>
+                                                {{-- Pesan error validasi tanggal --}}
+                                                <small id="pesan-tanggal" class="text-danger" style="display:none;"></small>
+                                                <small id="info-libur" class="text-warning" style="display:none;"></small>
+                                                <small id="loading-libur" class="text-muted" style="display:none;">
+                                                    <i class="fas fa-spinner fa-spin"></i> Memuat data libur nasional...
+                                                </small>
+                                                <small class="text-muted d-block mt-1">
+                                                    <i class="fas fa-clock"></i> Puskesmas buka Senin–Sabtu, pukul 07.30–14.00 WIB
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Jenis Pembayaran</label>
+                                                <select name="jenis_pembayaran" class="form-control" required
+                                                        onchange="toggleAsuransi(this.value)">
+                                                    <option value="">-- Pilih --</option>
+                                                    <option value="umum" {{ old('jenis_pembayaran') == 'umum' ? 'selected' : '' }}>Umum</option>
+                                                    <option value="bpjs" {{ old('jenis_pembayaran') == 'bpjs' ? 'selected' : '' }}>BPJS Kesehatan</option>
+                                                    <option value="asuransi" {{ old('jenis_pembayaran') == 'asuransi' ? 'selected' : '' }}>Asuransi</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
 
-       {{-- Nama Asuransi, muncul kalau pilih Asuransi --}}
-<div class="row" id="row-asuransi" style="display: {{ old('jenis_pembayaran') == 'asuransi' ? 'flex' : 'none' }};">
-    <div class="col-md-4">
-        <div class="form-group">
-            <label>Nama Asuransi</label>
+                                    {{-- Nama Asuransi, muncul kalau pilih Asuransi --}}
+                                    <div class="row" id="row-asuransi" style="display: {{ old('jenis_pembayaran') == 'asuransi' ? 'flex' : 'none' }};">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Nama Asuransi</label>
+                                                <select class="form-control" id="input-asuransi"
+                                                        onchange="toggleInputAsuransi(this.value)"
+                                                        name="nama_asuransi">
+                                                    <option value="">-- Pilih Asuransi --</option>
+                                                    <option value="Allianz" {{ old('nama_asuransi') == 'Allianz' ? 'selected' : '' }}>Allianz</option>
+                                                    <option value="AXA Mandiri" {{ old('nama_asuransi') == 'AXA Mandiri' ? 'selected' : '' }}>AXA Mandiri</option>
+                                                    <option value="Prudential" {{ old('nama_asuransi') == 'Prudential' ? 'selected' : '' }}>Prudential</option>
+                                                    <option value="Manulife" {{ old('nama_asuransi') == 'Manulife' ? 'selected' : '' }}>Manulife</option>
+                                                    <option value="Cigna" {{ old('nama_asuransi') == 'Cigna' ? 'selected' : '' }}>Cigna</option>
+                                                    <option value="Lainnya">Lainnya</option>
+                                                </select>
+                                                <input type="text" class="form-control" id="input-asuransi-lainnya"
+                                                       name="nama_asuransi"
+                                                       placeholder="Tulis nama asuransi kamu"
+                                                       value="{{ old('nama_asuransi') }}"
+                                                       style="display: none;">
+                                                <small id="link-kembali-asuransi" style="display:none;">
+                                                    <a href="#" onclick="kembaliKeDropdown(); return false;">← Pilih dari daftar</a>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
 
-            {{-- Dropdown --}}
-            <select class="form-control" id="input-asuransi"
-                    onchange="toggleInputAsuransi(this.value)"
-                    name="nama_asuransi">
-                <option value="">-- Pilih Asuransi --</option>
-                <option value="Allianz" {{ old('nama_asuransi') == 'Allianz' ? 'selected' : '' }}>Allianz</option>
-                <option value="AXA Mandiri" {{ old('nama_asuransi') == 'AXA Mandiri' ? 'selected' : '' }}>AXA Mandiri</option>
-                <option value="Prudential" {{ old('nama_asuransi') == 'Prudential' ? 'selected' : '' }}>Prudential</option>
-                <option value="Manulife" {{ old('nama_asuransi') == 'Manulife' ? 'selected' : '' }}>Manulife</option>
-                <option value="Cigna" {{ old('nama_asuransi') == 'Cigna' ? 'selected' : '' }}>Cigna</option>
-                <option value="Lainnya">Lainnya</option>
-            </select>
+                                    <div class="form-group">
+                                        <label>Keluhan</label>
+                                        <textarea name="keluhan" class="form-control" rows="3"
+                                            placeholder="Deskripsikan keluhan kamu" required>{{ old('keluhan') }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
 
-            {{-- Input text, muncul menggantikan dropdown kalau pilih Lainnya --}}
-            <input type="text" class="form-control" id="input-asuransi-lainnya"
-                   name="nama_asuransi"
-                   placeholder="Tulis nama asuransi kamu"
-                   value="{{ old('nama_asuransi') }}"
-                   style="display: none;">
-
-            {{-- Tombol kembali ke dropdown --}}
-            <small id="link-kembali-asuransi" style="display:none;">
-                <a href="#" onclick="kembaliKeDropdown(); return false;">
-                    ← Pilih dari daftar
-                </a>
-            </small>
-        </div>
-    </div>
-</div>
-        <div class="form-group">
-            <label>Keluhan</label>
-            <textarea name="keluhan" class="form-control" rows="3"
-                placeholder="Deskripsikan keluhan kamu" required>{{ old('keluhan') }}</textarea>
-        </div>
-    </div>
-</div>
-
-                            <button type="submit" class="btn btn-primary btn-block">
+                            <button type="submit" class="btn btn-primary btn-block" id="btn-daftar">
                                 <i class="fas fa-check"></i> Daftar Antrian
                             </button>
                         </form>
@@ -252,11 +255,11 @@
     </div>
 </div>
 
-                            
-
 <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
 <script>
+    // ============================================================
     // Data profil user untuk auto-fill
+    // ============================================================
     const profilUser = {
         nama: "{{ auth()->user()->name }}",
         nik: "{{ auth()->user()->nik }}",
@@ -272,7 +275,6 @@
 
     function toggleForm(nilai) {
         if (nilai === 'diri_sendiri') {
-            // Auto-fill data dari profil
             document.getElementById('input_nama').value = profilUser.nama;
             document.getElementById('input_nik').value = profilUser.nik;
             document.getElementById('input_tempat_lahir').value = profilUser.tempat_lahir;
@@ -280,15 +282,11 @@
             document.getElementById('input_alamat').value = profilUser.alamat;
             document.getElementById('input_no_hp').value = profilUser.no_hp;
             document.getElementById('input_pekerjaan').value = profilUser.pekerjaan;
-
-            // Set select options
             setSelect('input_agama', profilUser.agama);
             setSelect('input_pendidikan', profilUser.pendidikan_terakhir);
             setSelect('input_golongan_darah', profilUser.golongan_darah);
-
             document.getElementById('label-data-pasien').innerText = 'Data Pasien';
         } else {
-            // Kosongkan semua field
             document.getElementById('input_nama').value = '';
             document.getElementById('input_nik').value = '';
             document.getElementById('input_tempat_lahir').value = '';
@@ -299,7 +297,6 @@
             setSelect('input_agama', '');
             setSelect('input_pendidikan', '');
             setSelect('input_golongan_darah', '');
-
             document.getElementById('label-data-pasien').innerText = 'Data Orang yang Didaftarkan';
         }
     }
@@ -311,25 +308,183 @@
         }
     }
 
-    // Jalankan saat halaman pertama kali load
     window.onload = function() {
         const selected = document.querySelector('input[name="untuk"]:checked');
         if (selected) toggleForm(selected.value);
+        inisialisasiValidasiTanggal();
     };
+
+    // ============================================================
+    // Asuransi
+    // ============================================================
+    function toggleAsuransi(val) {
+        const row = document.getElementById('row-asuransi');
+        const input = document.getElementById('input-asuransi');
+        if (val === 'asuransi') {
+            row.style.display = 'flex';
+            input.setAttribute('required', 'required');
+        } else {
+            row.style.display = 'none';
+            input.removeAttribute('required');
+        }
+    }
+
+    function toggleInputAsuransi(val) {
+        if (val === 'Lainnya') {
+            document.getElementById('input-asuransi').style.display = 'none';
+            document.getElementById('input-asuransi').removeAttribute('name');
+            document.getElementById('input-asuransi-lainnya').style.display = 'block';
+            document.getElementById('input-asuransi-lainnya').setAttribute('name', 'nama_asuransi');
+            document.getElementById('input-asuransi-lainnya').setAttribute('required', 'required');
+            document.getElementById('input-asuransi-lainnya').focus();
+            document.getElementById('link-kembali-asuransi').style.display = 'block';
+        }
+    }
+
+    function kembaliKeDropdown() {
+        document.getElementById('input-asuransi').style.display = 'block';
+        document.getElementById('input-asuransi').setAttribute('name', 'nama_asuransi');
+        document.getElementById('input-asuransi').value = '';
+        document.getElementById('input-asuransi-lainnya').style.display = 'none';
+        document.getElementById('input-asuransi-lainnya').removeAttribute('name');
+        document.getElementById('input-asuransi-lainnya').removeAttribute('required');
+        document.getElementById('input-asuransi-lainnya').value = '';
+        document.getElementById('link-kembali-asuransi').style.display = 'none';
+    }
+
+    // ============================================================
+    // Validasi Hari Kerja + Libur Nasional
+    // ============================================================
+    let tanggalLibur = [];   // array string "YYYY-MM-DD"
+    let keteranganLibur = {}; // map "YYYY-MM-DD" => "nama libur"
+    let liburSudahDimuat = false;
+
+    function inisialisasiValidasiTanggal() {
+        const inputTanggal = document.getElementById('input_tanggal_kunjungan');
+        const tahunIni = new Date().getFullYear();
+
+        // Muat libur tahun ini dan tahun depan (antisipasi daftar untuk tahun depan)
+        muatLiburTahun(tahunIni);
+        muatLiburTahun(tahunIni + 1);
+
+        inputTanggal.addEventListener('change', function() {
+            validasiTanggal(this.value);
+        });
+
+        // Cegah submit kalau tanggal tidak valid
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const nilaiTanggal = inputTanggal.value;
+            if (nilaiTanggal && !tanggalValid(nilaiTanggal)) {
+                e.preventDefault();
+                validasiTanggal(nilaiTanggal); // tampilkan pesan error
+                inputTanggal.focus();
+            }
+        });
+    }
+
+    function muatLiburTahun(tahun) {
+        document.getElementById('loading-libur').style.display = 'block';
+
+        fetch(`https://dayoffapi.vercel.app/api?year=${tahun}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Gagal fetch');
+                return res.json();
+            })
+            .then(data => {
+                if (Array.isArray(data)) {
+                    data.forEach(item => {
+                        // Format dari API: { tanggal: "2026-01-01", keterangan: "Tahun Baru" }
+                        const tgl = item.tanggal;
+                        tanggalLibur.push(tgl);
+                        keteranganLibur[tgl] = item.keterangan;
+                    });
+                }
+                liburSudahDimuat = true;
+
+                // Re-validasi kalau pengguna sudah pilih tanggal sebelum data selesai dimuat
+                const inputTanggal = document.getElementById('input_tanggal_kunjungan');
+                if (inputTanggal.value) validasiTanggal(inputTanggal.value);
+            })
+            .catch(() => {
+                // Kalau API gagal, tetap lanjut — validasi server sebagai fallback
+                liburSudahDimuat = true;
+            })
+            .finally(() => {
+                document.getElementById('loading-libur').style.display = 'none';
+            });
+    }
+
+    function tanggalValid(tglString) {
+        const tgl = new Date(tglString + 'T00:00:00'); // hindari timezone shift
+        const hari = tgl.getDay(); // 0=Minggu, 6=Sabtu
+
+        // Minggu tidak boleh
+        if (hari === 0) return false;
+
+        // Cek libur nasional
+        if (tanggalLibur.includes(tglString)) return false;
+
+        return true;
+    }
+
+    function validasiTanggal(tglString) {
+        const pesanEl = document.getElementById('pesan-tanggal');
+        const infoLiburEl = document.getElementById('info-libur');
+        const btnDaftar = document.getElementById('btn-daftar');
+
+        // Reset dulu
+        pesanEl.style.display = 'none';
+        pesanEl.innerText = '';
+        infoLiburEl.style.display = 'none';
+        infoLiburEl.innerText = '';
+
+        if (!tglString) return;
+
+        // Cek batas maksimal H+3
+        const maxTgl = new Date();
+        maxTgl.setDate(maxTgl.getDate() + 3);
+        maxTgl.setHours(0, 0, 0, 0);
+        const tglDipilih = new Date(tglString + 'T00:00:00');
+        if (tglDipilih > maxTgl) {
+            pesanEl.innerText = '❌ Pendaftaran maksimal 3 hari ke depan. Pilih tanggal antara hari ini sampai ' +
+                maxTgl.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}) + '.';
+            pesanEl.style.display = 'block';
+            btnDaftar.disabled = true;
+            return;
+        }
+
+        const tgl = new Date(tglString + 'T00:00:00');
+        const hari = tgl.getDay();
+        const namaHari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][hari];
+
+        if (hari === 0) {
+            // Hari Minggu
+            pesanEl.innerText = '❌ Puskesmas tidak buka pada hari Minggu. Pilih hari Senin–Sabtu.';
+            pesanEl.style.display = 'block';
+            btnDaftar.disabled = true;
+            return;
+        }
+
+        if (tanggalLibur.includes(tglString)) {
+            // Libur nasional
+            const namaLibur = keteranganLibur[tglString] || 'Libur Nasional';
+            pesanEl.innerText = `❌ Tanggal ini adalah hari libur nasional (${namaLibur}). Pilih tanggal lain.`;
+            pesanEl.style.display = 'block';
+            btnDaftar.disabled = true;
+            return;
+        }
+
+        // Tanggal valid — tampilkan info hari
+        infoLiburEl.innerText = `✅ ${namaHari}, puskesmas buka.`;
+        infoLiburEl.classList.remove('text-warning');
+        infoLiburEl.classList.add('text-success');
+        infoLiburEl.style.display = 'block';
+        btnDaftar.disabled = false;
+    }
 </script>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Search filter
-    document.getElementById('searchInput').addEventListener('keyup', function() {
-        const keyword = this.value.toLowerCase();
-        const rows = document.querySelectorAll('tbody tr');
-        rows.forEach(row => {
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(keyword) ? '' : 'none';
-        });
-    });
-
-    // Logout konfirmasi
     function confirmLogout(event) {
         event.preventDefault();
         Swal.fire({
@@ -347,40 +502,6 @@
             }
         });
     }
-    function toggleAsuransi(val) {
-    const row = document.getElementById('row-asuransi');
-    const input = document.getElementById('input-asuransi');
-    if (val === 'asuransi') {
-        row.style.display = 'flex';
-        input.setAttribute('required', 'required');
-    } else {
-        row.style.display = 'none';
-        input.removeAttribute('required');
-    }
-}
-function toggleInputAsuransi(val) {
-    if (val === 'Lainnya') {
-        document.getElementById('input-asuransi').style.display = 'none';
-        document.getElementById('input-asuransi').removeAttribute('name');
-        document.getElementById('input-asuransi-lainnya').style.display = 'block';
-        document.getElementById('input-asuransi-lainnya').setAttribute('name', 'nama_asuransi');
-        document.getElementById('input-asuransi-lainnya').setAttribute('required', 'required');
-        document.getElementById('input-asuransi-lainnya').focus();
-        document.getElementById('link-kembali-asuransi').style.display = 'block';
-    }
-}
-
-function kembaliKeDropdown() {
-    document.getElementById('input-asuransi').style.display = 'block';
-    document.getElementById('input-asuransi').setAttribute('name', 'nama_asuransi');
-    document.getElementById('input-asuransi').value = '';
-    document.getElementById('input-asuransi-lainnya').style.display = 'none';
-    document.getElementById('input-asuransi-lainnya').removeAttribute('name');
-    document.getElementById('input-asuransi-lainnya').removeAttribute('required');
-    document.getElementById('input-asuransi-lainnya').value = '';
-    document.getElementById('link-kembali-asuransi').style.display = 'none';
-}
 </script>
-</body>
 </body>
 </html>

@@ -117,6 +117,40 @@ Route::middleware(['auth', 'pasien'])->group(function () {
         'Poli KIA'  => $buatDataPoli('Poli KIA'),
     ]);
     })->name('antrian.realtime');
+
+    // API posisi antrian pasien yang sedang login
+    Route::get('/api/posisi-antrian-saya', function() {
+        $today = now()->toDateString();
+        $userId = auth()->id();
+
+        // Cari antrian aktif pasien hari ini (menunggu atau dipanggil)
+        $antrian = \App\Models\Pendaftaran::where('user_id', $userId)
+            ->where('tanggal_kunjungan', $today)
+            ->whereIn('status', ['menunggu', 'dipanggil', 'selesai'])
+            ->first();
+
+        if (!$antrian) {
+            return response()->json(['ada' => false]);
+        }
+
+        // Hitung berapa orang di depan pasien ini (nomor antrian lebih kecil, masih menunggu/dipanggil)
+        $didepan = 0;
+        if ($antrian->status === 'menunggu') {
+            $didepan = \App\Models\Pendaftaran::where('poli', $antrian->poli)
+                ->where('tanggal_kunjungan', $today)
+                ->where('status', 'menunggu')
+                ->where('nomor_antrian', '<', $antrian->nomor_antrian)
+                ->count();
+        }
+
+        return response()->json([
+            'ada'           => true,
+            'poli'          => $antrian->poli,
+            'nomor_antrian' => $antrian->nomor_antrian,
+            'status'        => $antrian->status,
+            'posisi'        => $didepan,
+        ]);
+    })->name('antrian.posisi-saya');
 // Batalkan antrian
     Route::patch('/pendaftaran/{id}/batal', [PendaftaranController::class, 'batalkan'])
         ->name('pendaftaran.batal');

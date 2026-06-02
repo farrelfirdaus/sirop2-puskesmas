@@ -115,6 +115,30 @@
                     <p class="text-muted mb-0" id="nama-dipanggil" style="font-size:0.85rem;"></p>
                 </div>
                 <p class="text-muted mt-1" id="label-poli">Poli Umum — {{ now()->format('d M Y') }}</p>
+
+                {{-- Box posisi antrian pasien --}}
+                <div id="box-posisi-saya" style="display:none; margin: 10px 16px 4px; border-radius:10px;
+                     padding:10px 16px; background:#f0f4ff; border:1.5px solid #c7d7ff;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:36px; height:36px; border-radius:50%; background:#4e73df;
+                                    display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <i class="fas fa-user" style="color:white; font-size:0.85rem;"></i>
+                        </div>
+                        <div style="text-align:left; flex:1;">
+                            <div style="font-size:0.75rem; color:#4e73df; font-weight:700; text-transform:uppercase;">
+                                Antrian Kamu Hari Ini
+                            </div>
+                            <div id="posisi-saya-teks" style="font-size:0.85rem; color:#333; font-weight:500;">
+                                —
+                            </div>
+                        </div>
+                        <div id="posisi-saya-badge" style="display:none; background:#4e73df; color:white;
+                             border-radius:8px; padding:4px 10px; font-size:0.8rem; font-weight:700;">
+                            No. <span id="posisi-saya-nomor">-</span>
+                        </div>
+                    </div>
+                </div>
+
                 <hr>
                 <div style="display:flex; justify-content:space-around; padding:0 20px">
                     <div>
@@ -251,6 +275,7 @@ function gantiTab(poli, btn) {
 
     // Langsung fetch saat ganti tab
     refreshAntrianRealtime();
+    refreshPosisiSaya();
 }
 
 // Realtime: update setiap 5 detik
@@ -260,7 +285,48 @@ function refreshAntrianRealtime() {
         .then(data => {
             updateTampilanAntrian(data);
         })
-        .catch(() => {}); // silent fail
+        .catch(() => {});
+}
+
+// Fetch posisi antrian pasien yang login
+function refreshPosisiSaya() {
+    fetch('/api/posisi-antrian-saya')
+        .then(r => r.json())
+        .then(data => {
+            const box   = document.getElementById('box-posisi-saya');
+            const teks  = document.getElementById('posisi-saya-teks');
+            const badge = document.getElementById('posisi-saya-badge');
+            const nomor = document.getElementById('posisi-saya-nomor');
+
+            // Hanya tampilkan kalau poli yang aktif = poli antrian pasien
+            if (!data.ada || data.poli !== poliAktif) {
+                box.style.display = 'none';
+                return;
+            }
+
+            box.style.display = 'block';
+            nomor.textContent = String(data.nomor_antrian).padStart(3, '0');
+            badge.style.display = 'block';
+
+            if (data.status === 'dipanggil') {
+                teks.innerHTML = '<span style="color:#4e73df; font-weight:700;">🔔 Nomor kamu sedang dipanggil! Segera ke ruang pemeriksaan.</span>';
+                box.style.background = '#e8f0ff';
+                box.style.borderColor = '#4e73df';
+            } else if (data.status === 'menunggu') {
+                if (data.posisi === 0) {
+                    teks.textContent = 'Kamu adalah antrian berikutnya!';
+                } else {
+                    teks.textContent = 'Masih ' + data.posisi + ' orang di depan kamu.';
+                }
+                box.style.background = '#f0f4ff';
+                box.style.borderColor = '#c7d7ff';
+            } else if (data.status === 'selesai') {
+                teks.textContent = 'Antrian kamu sudah selesai dilayani.';
+                box.style.background = '#f0fff4';
+                box.style.borderColor = '#b2f5c8';
+            }
+        })
+        .catch(() => {});
 }
 
 // ============================================================
@@ -362,11 +428,13 @@ if (!document.getElementById('toast-style')) {
 
 // Load pertama kali saat halaman dibuka
 refreshAntrianRealtime();
+refreshPosisiSaya();
 cekNotifikasiDipanggil();
 
 // Polling gabungan setiap 5 detik
 setInterval(() => {
     refreshAntrianRealtime();
+    refreshPosisiSaya();
     cekNotifikasiDipanggil();
 }, 5000);
 </script>
